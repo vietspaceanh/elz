@@ -1,4 +1,4 @@
-from els import el, Element, runtime
+from elz import el, Element, runtime
 
 # Inline element
 intro = el("""md
