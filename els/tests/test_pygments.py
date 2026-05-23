@@ -1,4 +1,4 @@
-from elf import el
+from els import el
 
 code_snippet = """
 from deff import tbl  # a Table
