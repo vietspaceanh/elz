@@ -22,11 +22,11 @@ class Mods:
             return Mods(classes_toggle=[modifier[2:]])
         if modifier.startswith('.'):
             return Mods(classes=[modifier[1:]])
-        if modifier.startswith('{') and modifier.endswith('}'):
-            return Mods(styles=[modifier[1:-1]])
         if '=' in modifier:
             k, v = modifier.split('=', 1)
             return Mods(attrs={k: v})
+        if ':' in modifier:
+            return Mods(styles=[modifier])
         return Mods(attrs={modifier: ''})
 
     def merge(self, other: Mods) -> Mods:
