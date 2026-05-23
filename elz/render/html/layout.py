@@ -27,7 +27,7 @@ def grid_spec(
         for i in range(len(children))
     )
     content = (
-        f'<div style="display:grid;grid-template-columns:{col_templates};gap:{gap_str}">\n'
+        f'<div style="display:grid;grid-template-columns:{col_templates};row-gap:{gap_str}">\n'
         f"{items}\n"
         f"</div>"
     )

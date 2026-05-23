@@ -15,11 +15,11 @@ def _build_config(name: str) -> ThemeConfig:
         name=name,
         palette=palette,
         pygments_style=_build_pygments_style(name, palette),
-        padding="10px",
-        margin="0",
+        padding="12px",
+        margin="0 auto",
         border_radius="14px",
         gap="12px",
-        max_width="95%",
+        max_width="100%",
         font_family="HarmonyOS Sans, Inter, Ubuntu, Noto Sans, sans-serif",
         font_size="1em",
         code_font_family='"Iosevka SS02", monospace',
@@ -118,11 +118,6 @@ class ThemeService:
                 --el-toc-width: {t.toc_width};
                 --el-header-height: {t.header_height};
                 --el-footer-height: {t.footer_height};
-            }}
-            .el-page {{
-                max-width: var(--el-max-width);
-                width: 100%;
-                margin: 0 auto;
             }}
             """
             if t.css:

@@ -145,9 +145,7 @@ class Element:
           {title_html}{page_css}<meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
         <body>
-        <div class="el-page">
         {body}
-        </div>
         </body>
         </html>
         """
@@ -161,7 +159,7 @@ def root(body: Element) -> Element:
         func_name="root",
         name="root",
         format="html",
-        content='<div class="el-element">__ELF_0__</div>',
+        content='<div class="el">__ELF_0__</div>',
         deps=[body.spec],
         css=STRUCTURAL_CSS,
     )

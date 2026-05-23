@@ -1,104 +1,107 @@
 from __future__ import annotations
 
 _PAGE_CSS = """
-.el-element {
+.el {
     contain: layout style paint;
     background: var(--el-bg);
     color: var(--el-text);
     padding: var(--el-padding);
     margin: var(--el-margin);
+    max-width: var(--el-max-width);
     font-family: var(--el-font-family);
     font-size: var(--el-font-size);
+    line-height: calc(1em + var(--el-gap)*0.6);
 }
-.el-element li:has(> p) + li:has(> p) { margin-top: var(--el-gap); }
-.el-element-dev li:has(> p) + li:has(> p) { margin-top: var(--el-gap); }
-.el-element th, .el-element td { border: 1px solid var(--el-border); }
-.el-element .highlight {
+.el-text li:has(> p) + li:has(> p) { margin-top: var(--el-gap); }
+.el-dev li:has(> p) + li:has(> p) { margin-top: var(--el-gap); }
+.el th, .el td { border: 1px solid var(--el-border); }
+.el .highlight {
     background: var(--el-code-bg);
     border: 1px solid var(--el-border);
     border-radius: var(--el-border-radius);
     padding: var(--el-padding);
 }
-.el-element .highlight pre {
+.el .highlight pre {
     margin: 0;
     font-family: var(--el-code-family);
     font-size: var(--el-code-size);
 }
-.el-element code { font-size: var(--el-code-size); }
-.el-element code.hl { background: transparent; }
+.el code:not(pre code) { font-size: var(--el-code-size); font-family: var(--el-code-family); }
+.el code.hl { background: transparent; }
 .el-grid-item {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    padding: 0 calc(var(--el-gap) * 2);
+}
+.el-grid-item + .el-grid-item {
+    border-left: 1px solid var(--el-border);
 }
 .el-grid-item svg { max-width: 100%; height: auto; }
-.el-layout-row {
-    min-width: 0;
-}
-.el-layout-row .el-grid-item {
-    padding: var(--el-padding);
-}
-.el-layout-row .el-grid-item + .el-grid-item {
-    border-left: 1px solid var(--el-border);
-    padding-left: calc(var(--el-padding) * 2);
-}
-.el-layout-row .el-grid-item[data-sticky] {
+.el-grid-item[data-sticky] {
     position: sticky;
     top: 0;
     align-self: flex-start;
     max-height: 100vh;
     overflow-y: auto;
 }
-.el-layout-text {
-    padding: var(--el-padding);
+.el-row {
+    min-width: 0;
 }
 """
 
 _MARKDOWN_CSS = """
-.el-element h1 { margin: calc(var(--el-gap) * 1.75) 0 0; font-size: 2em; font-weight: 700; }
-.el-element h2 { margin: calc(var(--el-gap) * 1.5) 0 0; font-size: 1.5em; font-weight: 700; }
-.el-element h3 { margin: calc(var(--el-gap) * 1.25) 0 0; font-size: 1.25em; font-weight: 600; }
-.el-element h4 { margin: calc(var(--el-gap) * 1) 0 0; font-size: 1.1em; font-weight: 600; }
-:where(.el-element) p { margin: 0; }
-:where(.el-element) ul, :where(.el-element) ol { margin: 0; padding-left: calc(var(--el-indent) * 2); }
-:where(.el-element) li { margin: 0; }
-:where(.el-element) pre { margin: 0; }
-:where(.el-element) blockquote { margin: 0; padding: 0 1em; opacity: var(--el-opacity); }
-:where(.el-element) table { margin: 0; border-collapse: collapse; width: 100%; }
-:where(.el-element) th, :where(.el-element) td { padding: calc(var(--el-padding) * 0.6) var(--el-padding); }
-:where(.el-element) code { padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); }
-:where(.el-element) pre code { padding: 0; border-radius: 0; font-size: inherit; }
-:where(.el-element) hr { margin: 0; border: none; border-top: 1px solid; opacity: calc(var(--el-opacity) * 0.35); }
-:where(.el-element) a { color: inherit; }
-:where(.el-element) img { max-width: 100%; }
-:where(.el-element) > :last-child { margin-bottom: 0; }
+.el h1 { margin: calc(var(--el-gap) * 3) 0 0; font-size: 2em; font-weight: 700; }
+.el h2 { margin: calc(var(--el-gap) * 2.7) 0 0; font-size: 1.5em; font-weight: 700; }
+.el h3 { margin: calc(var(--el-gap) * 2.5) 0 0; font-size: 1.25em; font-weight: 600; }
+.el h4 { margin: calc(var(--el-gap) * 2.25) 0 0; font-size: 1.1em; font-weight: 600; }
+.el p { margin-bottom: 0; }
+.el-text ul, .el-text ol { margin-bottom: 0; padding-left: calc(var(--el-indent) * 2); }
+.el-text li { margin-bottom: 0; }
+.el-text li + li { margin-top: var(--el-gap); }
+.el pre { margin-bottom: 0; }
+.el blockquote { margin-bottom: 0; padding: 0 1em; opacity: var(--el-opacity); }
+.el table { margin-bottom: 0; border-collapse: collapse; width: 100%; }
+.el th, .el td { padding: calc(var(--el-padding) * 0.6) var(--el-padding); }
+.el code { padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); }
+.el pre code { padding: 0; border-radius: 0; font-size: inherit; }
+.el hr { margin-bottom: 0; border: none; border-top: 1px solid; opacity: calc(var(--el-opacity) * 0.35); }
+.el a { color: inherit; }
+.el img { max-width: 100%; }
 """
 
 _RHYTHM_CSS = """
-:is(.el-element, .el-element-dev, .el-layout-row, .el-layout-text, .el-fold-section, .el-grid-item) > * {
+:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > * {
     margin-top: var(--el-gap);
+    margin-bottom: 0;
 }
-:is(.el-element, .el-element-dev, .el-layout-row, .el-layout-text, .el-fold-section, .el-grid-item) > :first-child {
+:is(.el, .el-dev, .el-row, .el-fold-section, .el-grid-item) > :first-child {
     margin-top: 0 !important;
 }
-.el-element > div[style*="display:flex"],
-.el-element > div[style*="display:grid"],
-.el-element > .el-fold-section { margin-top: var(--el-gap); }
+.el > div[style*="display:flex"],
+.el > div[style*="display:grid"],
+.el > .el-fold-section { margin-top: var(--el-gap); }
 .el-fold-section > div[style*="display:flex"],
 .el-fold-section > div[style*="display:grid"] { margin-top: var(--el-gap); }
-:is(.el-element, .el-element-dev, .el-layout-row, .el-layout-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + * {
-    margin-top: calc(var(--el-gap) * 0.25);
+:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + * {
+    margin-top: calc(var(--el-gap) * 0.5);
+}
+:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + :is(h1, h2, h3, h4) {
+    margin-top: calc(var(--el-gap) * 1);
+}
+:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + :is(table, .highlight) {
+    margin-top: var(--el-gap);
 }
 """
 
 _DEV_CSS = """
-.el-element-dev { position: relative; padding-top: 1.2em; }
-.el-element-dev .el-dev-link {
+.el-dev { position: relative; padding-top: 1.2em; }
+.el-dev .el-dev-link {
     display: none; position: absolute; top: 0; right: 4px;
     z-index: 10; font-size: 0.7em;
     font-family: var(--el-code-family); white-space: nowrap;
 }
-.el-element-dev:hover .el-dev-link { display: inline; }
+.el-dev:hover .el-dev-link { display: inline; }
 .el-dev-link {
     color: var(--el-dev-link); text-decoration: none; opacity: 0.7;
     background: var(--el-dev-link-bg); padding: 1px 6px;

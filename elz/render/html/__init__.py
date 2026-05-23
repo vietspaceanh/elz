@@ -70,7 +70,7 @@ def _maybe_wrap_dev_child(content: str, spec: ElementSpec, dev_mode: bool = True
         return content
     name = html.escape(display_name(spec.func_name) if spec.func_name else spec.name or "")
     badge = _render_badge(spec, name)
-    return f'<div class="el-element-dev">{content}{badge}</div>'
+    return f'<div class="el-dev">{content}{badge}</div>'
 
 
 def _is_flat_template(content: str) -> bool:
@@ -130,7 +130,7 @@ def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, m
             if not gcontent.strip():
                 continue
             html = _fill_slots(gcontent, [], spec.format, codes, md)
-            results.append(f'    <div class="el-layout-text">{html}</div>')
+            results.append(f'    <div class="el-text">{html}</div>')
         else:
             def _remap(m):
                 old = int(m.group(1))
@@ -140,7 +140,7 @@ def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, m
             else:
                 children = [render_fragment(spec.deps[i], dev_mode, None, codes, md) for i in indices]
             html = _fill_slots(_SLOT_RE.sub(_remap, gcontent), children, spec.format, codes, md)
-            results.append(f'    <div class="el-layout-row">{html}</div>')
+            results.append(f'    <div class="el-row">{html}</div>')
 
     items = "\n".join(results)
     return f'<div style="display:flex;flex-direction:column;gap:var(--el-gap);width:100%">\n{items}\n</div>'
