@@ -21,7 +21,14 @@ def render_full_html(spec: ElementSpec, dev_mode: bool = True) -> str:
     if css:
         style += "\n" + css
 
-    return f'<style>{style}</style>\n{body}'
+    katex = """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script>
+renderMathInElement(document.body,{delimiters:[{left:"\\\\(",right:"\\\\)",display:false},{left:"$$",right:"$$",display:true}]})
+</script>"""
+
+    return f'<style>{style}</style>\n{katex}\n{body}'
 
 
 def render_fragment(spec: ElementSpec, dev_mode: bool = True, child_html: list[str] | None = None,
@@ -103,21 +110,21 @@ def _fill_slots(content: str, children: list[str], fmt: str, codes: dict, md) ->
 
 def _split_into_rows(content: str) -> list[tuple]:
     lines = content.split("\n")
-    groups: list[tuple[str, str, list[int]]] = []
+    groups: list[tuple[str, str, list[int], bool]] = []
     text_buf: list[str] = []
 
     for line in lines:
         indices = [int(m) for m in _SLOT_RE.findall(line)]
         if indices:
             if text_buf:
-                groups.append(("text", "\n".join(text_buf), []))
+                groups.append(("text", "\n".join(text_buf), [], False))
                 text_buf = []
-            groups.append(("element", line, indices))
+            groups.append(("element", line, indices, len(indices) > 1))
         else:
             text_buf.append(line)
 
     if text_buf:
-        groups.append(("text", "\n".join(text_buf), []))
+        groups.append(("text", "\n".join(text_buf), [], False))
     return groups
 
 
@@ -125,7 +132,7 @@ def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, m
                          child_html: list[str] | None = None) -> str:
     groups = _split_into_rows(content)
     results = []
-    for gtype, gcontent, indices in groups:
+    for gtype, gcontent, indices, has_multiple in groups:
         if gtype == "text":
             if not gcontent.strip():
                 continue
@@ -140,7 +147,11 @@ def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, m
             else:
                 children = [render_fragment(spec.deps[i], dev_mode, None, codes, md) for i in indices]
             html = _fill_slots(_SLOT_RE.sub(_remap, gcontent), children, spec.format, codes, md)
-            results.append(f'    <div class="el-row">{html}</div>')
+
+            if has_multiple:
+                results.append(f'    <div class="el-row">{html}</div>')
+            else:
+                results.append(html)
 
     items = "\n".join(results)
-    return f'<div style="display:flex;flex-direction:column;gap:var(--el-gap);width:100%">\n{items}\n</div>'
+    return items
