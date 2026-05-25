@@ -84,7 +84,7 @@ _MARKDOWN_CSS = f"""
 :is({_CONTENT_SCOPES}) pre {{ margin-bottom: 0; }}
 :is({_CONTENT_SCOPES}) blockquote {{ margin-bottom: 0; padding: 0 1em; opacity: var(--el-opacity); }}
 :is({_CONTENT_SCOPES}) table {{ margin-bottom: 0; border-collapse: collapse; width: 100%; }}
-:is({_CONTENT_SCOPES}) table, :is({_CONTENT_SCOPES}) .highlight {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
+:is({_CONTENT_SCOPES}) table {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
 :is({_CONTENT_SCOPES}) th, :is({_CONTENT_SCOPES}) td {{ padding: calc(var(--el-padding) * {_CELL_PADDING}) var(--el-padding); border: 1px solid var(--el-border); }}
 :is({_CONTENT_SCOPES}) code {{ padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); }}
 :is({_CONTENT_SCOPES}) pre code {{ padding: 0; border-radius: 0; font-size: inherit; }}
@@ -167,4 +167,50 @@ _DEV_CSS = """
 .el-fold-section > summary::-webkit-details-marker { display: none; }
 """
 
-STRUCTURAL_CSS = "\n".join([_PAGE_CSS, _WRAPPERS_RULE, _MARKDOWN_CSS, _RHYTHM_CSS, _MERMAID_CSS, _DEV_CSS])
+_CODEFENCE_CSS = f"""
+/* 0.5em is the size of the code badge */
+.el-code-wrap {{
+    position: relative; border-radius: var(--el-border-radius);
+    margin-top: calc(var(--el-gap) * {_GAP_STANDARD} + 0.5em);
+}}
+""" + """
+.el-code-lang-badge {
+    position: absolute; top: -0.5em; left: 0.75em; z-index: 1;
+    padding: 0 0.5em; font-size: 0.8em; font-family: var(--el-code-family);
+    font-weight: 600; letter-spacing: 0.04em; color: var(--el-text);
+    background: var(--el-bg);
+    border-radius: var(--el-border-radius) 0 var(--el-border-radius) 0;
+    user-select: none; pointer-events: none; display: flex; align-items: center;
+    gap: 4px; line-height: 1;
+}
+.el-code-lang-badge .el-code-lang-icon { height: 1.1em; }
+.el-code-copy {
+    position: absolute; top: var(--el-padding);
+    right: var(--el-padding); z-index: 1; opacity: 0;
+    transition: opacity 0.15s ease; display: flex; align-items: center;
+    justify-content: center; width: 28px; height: 28px;
+    border: 1px solid var(--el-border); border-radius: 6px;
+    background: color-mix(in srgb, var(--el-surface0) 50%, var(--el-bg));
+    color: var(--el-text); cursor: pointer; padding: 0;
+}
+.el-code-copy .el-code-check-icon { display: none; }
+.el-code-copy .el-code-copied .el-code-copy-icon { display: none; }
+.el-code-copy .el-code-copied .el-code-check-icon { display: flex; }
+.el-code-wrap:hover .el-code-copy { opacity: 0.75; }
+.el-code-wrap:hover .el-code-copy:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--el-surface0) 70%, transparent);
+}
+.el-code-wrap .highlight { overflow-x: auto; }
+.el-code-wrap .highlight pre { margin: 0; }
+"""
+
+STRUCTURAL_CSS = "\n".join([
+    _PAGE_CSS,
+    _WRAPPERS_RULE,
+    _MARKDOWN_CSS,
+    _RHYTHM_CSS,
+    _MERMAID_CSS,
+    _DEV_CSS,
+    _CODEFENCE_CSS,
+])

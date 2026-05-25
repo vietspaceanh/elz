@@ -99,6 +99,7 @@ class ThemeService:
                 --el-bg: {bg};
                 --el-text: {p["text"]};
                 --el-border: {p["border"]};
+                --el-surface0: {p["surface0"]};
                 --el-padding: {t.padding};
                 --el-margin: {t.margin};
                 --el-border-radius: {t.border_radius};

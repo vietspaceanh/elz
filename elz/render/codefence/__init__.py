@@ -19,6 +19,98 @@ from ..theme import theme
 PYG_RE = re.compile(r"py`([^`]+)`")
 PYG_PH_RE = re.compile(r"<!--PYG_(\d+)-->")
 
+_COPY_BTN = """<button class="el-code-copy" title="Copy code" onclick="(function(b){
+var w=b.closest('.el-code-wrap');
+var c=w.querySelector('.highlight');
+var t=c?c.textContent.trim():'';
+navigator.clipboard.writeText(t).then(function(){
+b.classList.add('el-code-copied');
+setTimeout(function(){b.classList.remove('el-code-copied');},2000);
+}).catch(function(){});
+})(this)">
+<span class="el-code-copy-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='9' y='9' width='13' height='13' rx='2' ry='2'/><path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/></svg></span>
+<span class="el-code-check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg></span>
+</button>"""
+
+_DEVICON_URLS: dict[str, str] = {
+    "python": "python/python-original",
+    "javascript": "javascript/javascript-original",
+    "js": "javascript/javascript-original",
+    "typescript": "typescript/typescript-original",
+    "ts": "typescript/typescript-original",
+    "go": "go/go-original-wordmark",
+    "rust": "rust/rust-original",
+    "html": "html5/html5-original",
+    "css": "css3/css3-original",
+    "bash": "bash/bash-original",
+    "sh": "bash/bash-original",
+    "shell": "bash/bash-original",
+    "zsh": "bash/bash-original",
+    "json": "json/json-original",
+    "yaml": "yaml/yaml-original",
+    "yml": "yaml/yaml-original",
+    "markdown": "markdown/markdown-original",
+    "md": "markdown/markdown-original",
+    "ruby": "ruby/ruby-original",
+    "rb": "ruby/ruby-original",
+    "java": "java/java-original",
+    "kotlin": "kotlin/kotlin-original",
+    "scala": "scala/scala-original",
+    "swift": "swift/swift-original",
+    "php": "php/php-original",
+    "r": "r/r-original",
+    "dart": "dart/dart-original",
+    "elixir": "elixir/elixir-original",
+    "haskell": "haskell/haskell-original",
+    "lua": "lua/lua-original",
+    "perl": "perl/perl-original",
+    "matlab": "matlab/matlab-original",
+    "dockerfile": "docker/docker-original",
+    "sql": "azuresqldatabase/azuresqldatabase-original",
+}
+
+_LANG_ICONS: dict[str, str] = {
+    "python": "Py",
+    "javascript": "JS", "js": "JS",
+    "typescript": "TS", "ts": "TS",
+    "go": "Go",
+    "rust": "Rs",
+    "sql": "SQL",
+    "html": "HTML",
+    "css": "CSS",
+    "bash": "$", "sh": "$", "shell": "$", "zsh": "$",
+    "json": "{}",
+    "yaml": "YM", "yml": "YM",
+    "markdown": "MD", "md": "MD",
+    "ruby": "Rb", "rb": "Rb",
+    "java": "Java",
+    "kotlin": "Kt",
+    "scala": "Scala",
+    "swift": "Swift",
+    "php": "PHP",
+    "r": "R",
+    "dart": "Dart",
+    "elixir": "Ex",
+    "haskell": "Hs",
+    "lua": "Lua",
+    "perl": "Perl",
+    "matlab": "Matlab",
+    "dockerfile": "Docker",
+    "makefile": "Make",
+}
+
+
+_DEVICON_CDN = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons"
+
+
+def _lang_badge(lang: str) -> str:
+    text = _LANG_ICONS.get(lang, lang[:2].title() if lang else "")
+    path = _DEVICON_URLS.get(lang)
+    if path:
+        icon = f'<img src="{_DEVICON_CDN}/{path}.svg" alt="{html.escape(lang)}" class="el-code-lang-icon">'
+        return f'<span class="el-code-lang-badge">{icon}<span>{html.escape(text)}</span></span>'
+    return f'<span class="el-code-lang-badge">{html.escape(text)}</span>'
+
 _md: mistune.Markdown | None = None
 
 
@@ -67,7 +159,11 @@ def render_codefence(text: str, info: str | None = None, **kwargs) -> str:
     lang = (info.split(None, 1)[0] if info else "") or ""
     if lang == "mermaid":
         return _render_mermaid(text)
-    return _highlight_code_cached(text, lang, theme.config.pygments_style)
+
+    highlighted = _highlight_code_cached(text, lang, theme.config.pygments_style)
+    badge = _lang_badge(lang) if lang else ""
+
+    return f'<div class="el-code-wrap">{badge}{_COPY_BTN}{highlighted}</div>'
 
 
 @functools.lru_cache(maxsize=512)
@@ -111,7 +207,6 @@ def get_md() -> mistune.Markdown:
     global _md
     if _md is None:
         _md = mistune.create_markdown(escape=False, plugins=[_codefence_plugin, _table_plugin.table, _math_plugin])
-        _heading = _md.renderer.heading
         def _heading_with_id(text, level, **attrs):
             slug = _heading_slugify(text)
             return f'<h{level} id="{slug}">{text}</h{level}>'
