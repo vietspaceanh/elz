@@ -5,7 +5,7 @@ _GAP_STANDARD = 1
 _H1_TOP_EM = 1.5
 _H2_TOP_EM = 1.2
 _H3_TOP_EM = 1
-_H4_TOP_EM = 0.5
+_H4_TOP_EM = 0.66
 _H1_SIZE = 1.75
 _H2_SIZE = 1.45
 _H3_SIZE = 1.3
@@ -71,14 +71,14 @@ _WRAPPERS_RULE = f"""
 """
 
 _MARKDOWN_CSS = f"""
-:is({_CONTENT_SCOPES}) h1 {{ font-size: {_H1_SIZE}em; font-weight: 700; line-height: {_HEADING_LINE_HEIGHT}; }}
-:is({_CONTENT_SCOPES}) h2 {{ font-size: {_H2_SIZE}em; font-weight: 700; line-height: {_HEADING_LINE_HEIGHT}; }}
+:is({_CONTENT_SCOPES}) h1 {{ font-size: {_H1_SIZE}em; font-weight: 600; line-height: {_HEADING_LINE_HEIGHT}; }}
+:is({_CONTENT_SCOPES}) h2 {{ font-size: {_H2_SIZE}em; font-weight: 600; line-height: {_HEADING_LINE_HEIGHT}; }}
 :is({_CONTENT_SCOPES}) h3 {{ font-size: {_H3_SIZE}em; font-weight: 600; line-height: {_HEADING_LINE_HEIGHT}; }}
 :is({_CONTENT_SCOPES}) h4 {{ font-size: {_H4_SIZE}em; font-weight: 600; line-height: {_HEADING_LINE_HEIGHT}; }}
 :is({_CONTENT_SCOPES}) p {{ margin-bottom: 0; }}
 :is({_CONTENT_SCOPES}) ul, :is({_CONTENT_SCOPES}) ol {{ margin-bottom: 0; padding-left: calc(var(--el-indent) * {_LIST_INDENT}); }}
 :is({_CONTENT_SCOPES}) li {{ margin-bottom: 0; }}
-:is({_CONTENT_SCOPES}) ol > li::marker {{ font-weight: 700; }}
+:is({_CONTENT_SCOPES}) ol > li::marker {{ font-weight: 600; }}
 :is({_CONTENT_SCOPES}) li > p {{ margin-top: 0; margin-bottom: 0; }}
 :is({_CONTENT_SCOPES}) li > span.math {{ display: inline-block; margin: 0; padding-top: calc(var(--el-gap) * {_GAP_STANDARD / 4}); padding-bottom: calc(var(--el-gap) * {_GAP_STANDARD / 4}); }}
 :is({_CONTENT_SCOPES}) pre {{ margin-bottom: 0; }}
@@ -185,8 +185,8 @@ _CODEFENCE_CSS = f"""
 }
 .el-code-lang-badge .el-code-lang-icon { height: 1.1em; }
 .el-code-copy {
-    position: absolute; top: var(--el-padding);
-    right: var(--el-padding); z-index: 1; opacity: 0;
+    position: absolute; top: calc(var(--el-padding) * 0.66);
+    right: calc(var(--el-padding) * 0.66); z-index: 1; opacity: 0;
     transition: opacity 0.15s ease; display: flex; align-items: center;
     justify-content: center; width: 28px; height: 28px;
     border: 1px solid var(--el-border); border-radius: 6px;
@@ -194,8 +194,8 @@ _CODEFENCE_CSS = f"""
     color: var(--el-text); cursor: pointer; padding: 0;
 }
 .el-code-copy .el-code-check-icon { display: none; }
-.el-code-copy .el-code-copied .el-code-copy-icon { display: none; }
-.el-code-copy .el-code-copied .el-code-check-icon { display: flex; }
+.el-code-copy.el-code-copied .el-code-copy-icon { display: none; }
+.el-code-copy.el-code-copied .el-code-check-icon { display: flex; }
 .el-code-wrap:hover .el-code-copy { opacity: 0.75; }
 .el-code-wrap:hover .el-code-copy:hover {
     opacity: 1;
