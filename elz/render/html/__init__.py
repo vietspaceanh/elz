@@ -7,7 +7,7 @@ import mistune
 
 from ...specs import ElementSpec
 from ..css import collect_component_css, wrap_scope
-from ..highlight import get_md, process_pyg, restore_pyg
+from ..codefence import get_md, process_pyg, restore_pyg
 from ..theme import theme
 
 _SLOT_RE = re.compile(r"__ELF_(\d+)__")
