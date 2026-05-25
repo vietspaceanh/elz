@@ -4,7 +4,7 @@ import html
 from ...specs import ElementSpec, Mods
 
 
-def grid_spec(
+def row_spec(
     children: list[ElementSpec],
     cols: int = 2,
     weights: list[int | float] | None = None,
@@ -53,6 +53,22 @@ def _grid_item_html(ph: str, extra_style: str = "", mods: Mods | None = None) ->
     if extra_style:
         styles.append(extra_style)
     return f'    <div class="{" ".join(el_classes)}" style="{";".join(styles)}"{extra}>{ph}</div>'
+
+
+def column_spec(children: list[ElementSpec], gap: int | str | None = None) -> ElementSpec:
+    if gap is None:
+        gap_str = "0"
+    elif isinstance(gap, int):
+        gap_str = f"{gap}px"
+    else:
+        gap_str = gap
+    items = "\n".join(f"__ELF_{i}__" for i in range(len(children)))
+    content = (
+        f'<div style="display:flex;flex-direction:column;gap:{gap_str}">\n'
+        f"{items}\n"
+        "</div>"
+    )
+    return _layout_spec("column", content, deps=children)
 
 
 def _layout_spec(

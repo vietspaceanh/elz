@@ -5,7 +5,7 @@ import re
 from dataclasses import replace
 
 from .render import generate_mermaid_code, render_full_html
-from .render.html.layout import grid_spec
+from .render.html.layout import column_spec, row_spec
 from .render.html.style import STRUCTURAL_CSS
 from .render.theme import theme
 from .runtime import composition_deps, runtime
@@ -81,18 +81,34 @@ class Element:
 
     def __or__(self, other):
         if isinstance(other, Element):
-            return grid(self._row_children + other._row_children)
+            return row(*self._row_children, *other._row_children)
         wrapped = _wrap_repr_html(other)
         if wrapped is not None:
-            return grid(self._row_children + wrapped._row_children)
+            return row(*self._row_children, *wrapped._row_children)
         return NotImplemented
 
     def __ror__(self, other):
         wrapped = _wrap_repr_html(other)
         if wrapped is not None:
-            return grid(wrapped._row_children + self._row_children)
+            return row(*wrapped._row_children, *self._row_children)
         if isinstance(other, Element):
-            return grid(other._row_children + self._row_children)
+            return row(*other._row_children, *self._row_children)
+        return NotImplemented
+
+    def __truediv__(self, other):
+        if isinstance(other, Element):
+            return column(self, other)
+        wrapped = _wrap_repr_html(other)
+        if wrapped is not None:
+            return column(self, wrapped)
+        return NotImplemented
+
+    def __rtruediv__(self, other):
+        wrapped = _wrap_repr_html(other)
+        if wrapped is not None:
+            return column(wrapped, self)
+        if isinstance(other, Element):
+            return column(other, self)
         return NotImplemented
 
     def _copy(self) -> Element:
@@ -166,13 +182,19 @@ def root(body: Element) -> Element:
     return Element(spec)
 
 
-def grid(children: list[Element], cols: int = 2, weights: list[int | float] | None = None, gap: int | str | None = None) -> Element:
+def row(*children: Element, weights: list[int | float] | None = None, gap: int | str | None = None) -> Element:
     specs = [c.spec for c in children]
     mods = [c.spec.mods for c in children]
-    spec = grid_spec(specs, cols, weights, gap, mods)
+    spec = row_spec(specs, cols=len(children), weights=weights, gap=gap, mods=mods)
     el = Element(spec)
     el._layout_children = list(children)
     return el
+
+
+def column(*children: Element, gap: int | str | None = None) -> Element:
+    specs = [c.spec for c in children]
+    spec = column_spec(specs, gap=gap)
+    return Element(spec)
 
 
 def sticky(el):
