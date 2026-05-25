@@ -36,11 +36,15 @@ def el(func: typing.Callable[P, str] | str | typing.Any) -> typing.Callable[P, E
         name, source, source_text = resolve_inline_source(frame)
         if not source_text:
             source_text = content
+        deps = []
+        if (stack := composition_deps.get()) and (parent := stack[-1]):
+            content, deps = _reindex_slots(content, parent)
         spec = ElementSpec(
             func_name=name,
             name=name,
             format=fmt,
             content=content,
+            deps=deps,
             adhoc_fn=lambda: content,
             source=source,
             source_text=source_text,
@@ -158,11 +162,7 @@ class ElementFunction:
             adhoc_fn = result.spec.adhoc_fn
         else:
             fmt, content = _parse(str(result))
-            slots = sorted({int(m) for m in SLOT_RE.findall(content)})
-            if len(slots) < len(local_deps):
-                renumber = {old: i for i, old in enumerate(slots)}
-                content = SLOT_RE.sub(lambda m: f"__ELF_{renumber[int(m.group(1))]}__", content)
-                local_deps = [local_deps[i] for i in slots]
+            content, local_deps = _reindex_slots(content, local_deps)
             adhoc_fn = None
 
         name = sanitize_alias(self.name, all_args)
@@ -283,6 +283,14 @@ class ElementFunction:
         self._err_require_args_and_cannot("be used with the pipe operator")
         return other | self()
 
+    def __truediv__(self, other):
+        self._err_require_args_and_cannot("be used with the / operator")
+        return self() / other
+
+    def __rtruediv__(self, other):
+        self._err_require_args_and_cannot("be used with the / operator")
+        return other / self()
+
     def __matmul__(self, weight):
         self._err_require_args_and_cannot("be used with the @ operator")
         return self() @ weight
@@ -312,6 +320,15 @@ def params(cls):
 
     cls.__setattr__ = __setattr__
     return cls
+
+
+def _reindex_slots(content: str, deps: list) -> tuple[str, list]:
+    slots = sorted({int(m) for m in SLOT_RE.findall(content)})
+    if len(slots) >= len(deps):
+        return content, list(deps)
+    remap = {old: new for new, old in enumerate(slots)}
+    content = SLOT_RE.sub(lambda m: f"__ELF_{remap[int(m.group(1))]}__", content)
+    return content, [deps[i] for i in slots]
 
 
 def _parse(raw: str) -> tuple[str, str]:
