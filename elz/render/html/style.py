@@ -1,7 +1,29 @@
 from __future__ import annotations
 
-_PAGE_CSS = """
-.el {
+# Spacing multipliers (scale against variables like --el-gap)
+_GAP_STANDARD = 1
+_H1_TOP_EM = 1.5
+_H2_TOP_EM = 1.2
+_H3_TOP_EM = 1
+_H4_TOP_EM = 0.5
+_H1_SIZE = 1.75
+_H2_SIZE = 1.45
+_H3_SIZE = 1.3
+_H4_SIZE = 1.2
+_LINE_HEIGHT_FACTOR = 0.5
+_HEADING_LINE_HEIGHT = 1.2
+_GRID_PADDING_X = 2.5
+_CELL_PADDING = 0.6
+_LIST_INDENT = 2
+
+# All structural wrapper classes are transparent (no margin on themselves)
+_TRANSPARENT_WRAPPERS = ".el-row, .el-grid-item, .el-dev, .el-fold-section, .el-text"
+# All containers that can hold markdown-rendered content
+_CONTENT_SCOPES = ".el, .el-dev, .el-row, .el-fold-section, .el-grid-item, .el-text"
+
+_PAGE_CSS = f"""
+/* Root container */
+.el {{
     contain: layout style paint;
     background: var(--el-bg);
     color: var(--el-text);
@@ -10,88 +32,118 @@ _PAGE_CSS = """
     max-width: var(--el-max-width);
     font-family: var(--el-font-family);
     font-size: var(--el-font-size);
-    line-height: calc(1em + var(--el-gap)*0.6);
-}
-.el-text li:has(> p) + li:has(> p) { margin-top: var(--el-gap); }
-.el-dev li:has(> p) + li:has(> p) { margin-top: var(--el-gap); }
-.el th, .el td { border: 1px solid var(--el-border); }
-.el .highlight {
-    background: var(--el-code-bg);
-    border: 1px solid var(--el-border);
-    border-radius: var(--el-border-radius);
-    padding: var(--el-padding);
-}
-.el .highlight pre {
-    margin: 0;
-    font-family: var(--el-code-family);
-    font-size: var(--el-code-size);
-}
-.el code:not(pre code) { font-size: var(--el-code-size); font-family: var(--el-code-family); }
-.el code.hl { background: transparent; }
-.el-grid-item {
+    line-height: calc(1em + var(--el-gap)*{_LINE_HEIGHT_FACTOR});
+}}
+
+/* List spacing between items with direct <p> (paragraph split) */
+:is({_CONTENT_SCOPES}) li:has(> p) + li:has(> p) {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
+
+/* Grid item layout */
+.el-grid-item {{
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 0 calc(var(--el-gap) * 2);
-}
-.el-grid-item + .el-grid-item {
+    padding: 0 calc(var(--el-gap) * {_GRID_PADDING_X});
+}}
+.el-grid-item + .el-grid-item {{
     border-left: 1px solid var(--el-border);
-}
-.el-grid-item svg { max-width: 100%; height: auto; }
-.el-grid-item[data-sticky] {
+}}
+.el-grid-item svg {{ max-width: 100%; height: auto; }}
+.el-grid-item[data-sticky] {{
     position: sticky;
     top: 0;
     align-self: flex-start;
     max-height: 100vh;
     overflow-y: auto;
-}
-.el-row {
+}}
+
+/* Row container */
+.el-row {{
     min-width: 0;
-}
+}}
 """
 
-_MARKDOWN_CSS = """
-.el h1 { margin: calc(var(--el-gap) * 3) 0 0; font-size: 2em; font-weight: 700; }
-.el h2 { margin: calc(var(--el-gap) * 2.7) 0 0; font-size: 1.5em; font-weight: 700; }
-.el h3 { margin: calc(var(--el-gap) * 2.5) 0 0; font-size: 1.25em; font-weight: 600; }
-.el h4 { margin: calc(var(--el-gap) * 2.25) 0 0; font-size: 1.1em; font-weight: 600; }
-.el p { margin-bottom: 0; }
-.el-text ul, .el-text ol { margin-bottom: 0; padding-left: calc(var(--el-indent) * 2); }
-.el-text li { margin-bottom: 0; }
-.el-text li + li { margin-top: var(--el-gap); }
-.el pre { margin-bottom: 0; }
-.el blockquote { margin-bottom: 0; padding: 0 1em; opacity: var(--el-opacity); }
-.el table { margin-bottom: 0; border-collapse: collapse; width: 100%; }
-.el th, .el td { padding: calc(var(--el-padding) * 0.6) var(--el-padding); }
-.el code { padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); }
-.el pre code { padding: 0; border-radius: 0; font-size: inherit; }
-.el hr { margin-bottom: 0; border: none; border-top: 1px solid; opacity: calc(var(--el-opacity) * 0.35); }
-.el a { color: inherit; }
-.el img { max-width: 100%; }
-"""
-
-_RHYTHM_CSS = """
-:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > * {
-    margin-top: var(--el-gap);
-    margin-bottom: 0;
-}
-:is(.el, .el-dev, .el-row, .el-fold-section, .el-grid-item) > :first-child {
+_WRAPPERS_RULE = f"""
+/* All structural wrappers are transparent */
+:is({_TRANSPARENT_WRAPPERS}) {{
     margin-top: 0 !important;
-}
+}}
+"""
+
+_MARKDOWN_CSS = f"""
+:is({_CONTENT_SCOPES}) h1 {{ font-size: {_H1_SIZE}em; font-weight: 700; line-height: {_HEADING_LINE_HEIGHT}; }}
+:is({_CONTENT_SCOPES}) h2 {{ font-size: {_H2_SIZE}em; font-weight: 700; line-height: {_HEADING_LINE_HEIGHT}; }}
+:is({_CONTENT_SCOPES}) h3 {{ font-size: {_H3_SIZE}em; font-weight: 600; line-height: {_HEADING_LINE_HEIGHT}; }}
+:is({_CONTENT_SCOPES}) h4 {{ font-size: {_H4_SIZE}em; font-weight: 600; line-height: {_HEADING_LINE_HEIGHT}; }}
+:is({_CONTENT_SCOPES}) p {{ margin-bottom: 0; }}
+:is({_CONTENT_SCOPES}) ul, :is({_CONTENT_SCOPES}) ol {{ margin-bottom: 0; padding-left: calc(var(--el-indent) * {_LIST_INDENT}); }}
+:is({_CONTENT_SCOPES}) li {{ margin-bottom: 0; }}
+:is({_CONTENT_SCOPES}) ol > li::marker {{ font-weight: 700; }}
+:is({_CONTENT_SCOPES}) li > p {{ margin-top: 0; margin-bottom: 0; }}
+:is({_CONTENT_SCOPES}) li > span.math {{ display: inline-block; margin: 0; padding-top: calc(var(--el-gap) * {_GAP_STANDARD / 4}); padding-bottom: calc(var(--el-gap) * {_GAP_STANDARD / 4}); }}
+:is({_CONTENT_SCOPES}) pre {{ margin-bottom: 0; }}
+:is({_CONTENT_SCOPES}) blockquote {{ margin-bottom: 0; padding: 0 1em; opacity: var(--el-opacity); }}
+:is({_CONTENT_SCOPES}) table {{ margin-bottom: 0; border-collapse: collapse; width: 100%; }}
+:is({_CONTENT_SCOPES}) table, :is({_CONTENT_SCOPES}) .highlight {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
+:is({_CONTENT_SCOPES}) th, :is({_CONTENT_SCOPES}) td {{ padding: calc(var(--el-padding) * {_CELL_PADDING}) var(--el-padding); border: 1px solid var(--el-border); }}
+:is({_CONTENT_SCOPES}) code {{ padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); }}
+:is({_CONTENT_SCOPES}) pre code {{ padding: 0; border-radius: 0; font-size: inherit; }}
+:is({_CONTENT_SCOPES}) hr {{ margin-bottom: 0; border: none; border-top: 1px solid; opacity: calc(var(--el-opacity) * 0.35); }}
+:is({_CONTENT_SCOPES}) a {{ color: inherit; }}
+:is({_CONTENT_SCOPES}) img {{ max-width: 100%; }}
+:is({_CONTENT_SCOPES}) .highlight {{
+    background: var(--el-code-bg);
+    border: 1px solid var(--el-border);
+    border-radius: var(--el-border-radius);
+    padding: var(--el-padding);
+}}
+:is({_CONTENT_SCOPES}) .highlight pre {{
+    margin: 0;
+    font-family: var(--el-code-family);
+    font-size: var(--el-code-size);
+}}
+:is({_CONTENT_SCOPES}) code:not(pre code) {{ font-size: var(--el-code-size); font-family: var(--el-code-family); }}
+:is({_CONTENT_SCOPES}) code.hl {{ background: transparent; }}
+:is({_CONTENT_SCOPES}) .math {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); margin-bottom: 0; }}
+:is({_CONTENT_SCOPES}) .math .katex-display {{ margin: 0; }}
+"""
+
+_RHYTHM_CSS = f"""
+/* Standard vertical rhythm — everything gets margin-top: 0.5×gap */
+:is({_CONTENT_SCOPES}) > * {{
+    margin-top: calc(var(--el-gap) * {_GAP_STANDARD});
+    margin-bottom: 0;
+}}
+
+/* Headings: em-based top margins */
+:is({_CONTENT_SCOPES}) h1 {{ margin-top: {_H1_TOP_EM}em; }}
+:is({_CONTENT_SCOPES}) h2 {{ margin-top: {_H2_TOP_EM}em; }}
+:is({_CONTENT_SCOPES}) h3 {{ margin-top: {_H3_TOP_EM}em; }}
+:is({_CONTENT_SCOPES}) h4 {{ margin-top: {_H4_TOP_EM}em; }}
+
+/* Tighter spacing between paragraph and following list */
+:is({_CONTENT_SCOPES}) p + ul, :is({_CONTENT_SCOPES}) p + ol {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD} / 4); }}
+
+/* Flex/grid containers follow the standard gap */
 .el > div[style*="display:flex"],
 .el > div[style*="display:grid"],
-.el > .el-fold-section { margin-top: var(--el-gap); }
+.el > .el-fold-section {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
 .el-fold-section > div[style*="display:flex"],
-.el-fold-section > div[style*="display:grid"] { margin-top: var(--el-gap); }
-:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + * {
-    margin-top: calc(var(--el-gap) * 0.5);
-}
-:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + :is(h1, h2, h3, h4) {
-    margin-top: calc(var(--el-gap) * 1);
-}
-:is(.el, .el-dev, .el-row, .el-text, .el-fold-section, .el-grid-item) > :is(h1, h2, h3, h4) + :is(table, .highlight) {
-    margin-top: var(--el-gap);
-}
+.el-fold-section > div[style*="display:grid"] {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
+"""
+
+_MERMAID_CSS = """
+.g-wrap { overflow: hidden; width: 100%; height: 500px; cursor: grab;
+           border: 1px solid var(--el-border); border-radius: 14px;
+           background: var(--el-bg); position: relative; user-select: none; }
+.g-wrap img { display: block; width: 100%; height: 100%; object-fit: contain;
+                pointer-events: none; }
+.g-btn { position: absolute; top: 8px; right: 8px; z-index: 10;
+          background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+          border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+          color: #ddd; font-size: 0.8em; padding: 3px 10px;
+          cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+.g-btn:hover { opacity: 1; color: #fff; }
 """
 
 _DEV_CSS = """
@@ -115,4 +167,4 @@ _DEV_CSS = """
 .el-fold-section > summary::-webkit-details-marker { display: none; }
 """
 
-STRUCTURAL_CSS = "\n".join([_PAGE_CSS, _MARKDOWN_CSS, _RHYTHM_CSS, _DEV_CSS])
+STRUCTURAL_CSS = "\n".join([_PAGE_CSS, _WRAPPERS_RULE, _MARKDOWN_CSS, _RHYTHM_CSS, _MERMAID_CSS, _DEV_CSS])

@@ -88,8 +88,8 @@ def _drawer_css(position: str) -> str:
     }}
     .el-drawer-h {{ display: flex; justify-content: space-between; align-items: center; }}
     .el-drawer-h h3 {{ margin: 0; font-size: 1.1em; font-weight: 600; }}
-    ul {{ list-style: none; padding: 0; margin: 0; }}
-    ul ul {{ padding-left: calc(var(--el-indent) * 1); }}
+    .el-root ul {{ list-style: none; padding: 0; margin: 0; }}
+    .el-root ul ul {{ padding-left: calc(var(--el-indent) * 1); }}
     a {{ color: var(--el-link); text-decoration: none; font-size: .95em; }}
     a:hover {{ text-decoration: underline; }}
     @media (max-width: 768px) {{
