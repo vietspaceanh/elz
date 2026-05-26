@@ -105,7 +105,8 @@ class ThemeService:
                 --el-border-radius: {t.border_radius};
                 --el-gap: {t.gap};
                 --el-max-width: {t.max_width};
-                --el-link: {p["link"]};
+                --el-link-color: {p["link"]};
+                --el-code-color: {p["blue"]};
                 --el-font-family: {t.font_family};
                 --el-font-size: {t.font_size};
                 --el-code-family: {t.code_font_family};

@@ -7,7 +7,6 @@ from pygments.style import Style
 BORDER_DARK = "#42434B"
 BORDER_LIGHT = "#acb0be"
 
-
 PALETTES: dict[str, dict[str, str]] = {
     "catppuccin_mocha": {
         "bg": "#1e1e2e", "text": "#cdd6f4",
@@ -19,7 +18,7 @@ PALETTES: dict[str, dict[str, str]] = {
     },
     "catppuccin_latte": {
         "bg": "#e6e9ef", "text": "#4c4f69",
-        "border": BORDER_LIGHT, "link": "#1e66f5",
+        "border": BORDER_LIGHT, "link": "#1c4ed8",
         "surface0": "#d0d4dd", "surface1": "#d0d4dd", "surface2": "#acb0be",
         "blue": "#1c4ed8", "green": "#2d7a1e", "orange": "#d95b0a",
         "purple": "#6d28d9", "red": "#d20f39", "teal": "#179299",
@@ -27,7 +26,7 @@ PALETTES: dict[str, dict[str, str]] = {
     },
     "nord": {
         "bg": "#2e3440", "text": "#d8dee9",
-        "border": BORDER_DARK, "link": "#88c0d0",
+        "border": BORDER_DARK, "link": "#81a1c1",
         "surface0": "#3b4252", "surface1": "#434c5e", "surface2": "#4c566a",
         "blue": "#81a1c1", "green": "#a3be8c", "orange": "#d08770",
         "purple": "#b48ead", "red": "#bf616a", "teal": "#8fbcbb",
@@ -43,7 +42,7 @@ PALETTES: dict[str, dict[str, str]] = {
     },
     "github_light": {
         "bg": "#e6e9ef", "text": "#24292f",
-        "border": BORDER_LIGHT, "link": "#0550ae",
+        "border": BORDER_LIGHT, "link": "#0969da",
         "surface0": "#e8eaed", "surface1": "#d0d7de", "surface2": "#afb8c1",
         "blue": "#0969da", "green": "#1a7f37", "orange": "#9a6700",
         "purple": "#8250df", "red": "#cf222e", "teal": "#2da44e",
@@ -59,7 +58,7 @@ PALETTES: dict[str, dict[str, str]] = {
     },
     "kanagawa_wave": {
         "bg": "#1f1f28", "text": "#dcd7ba",
-        "border": BORDER_DARK, "link": "#7fb4ca",
+        "border": BORDER_DARK, "link": "#7e9cd8",
         "surface0": "#363646", "surface1": "#54546d", "surface2": "#72727e",
         "blue": "#7e9cd8", "green": "#98bb6c", "orange": "#ffa066",
         "purple": "#957fb8", "red": "#e46876", "teal": "#7fb4ca",
@@ -67,7 +66,7 @@ PALETTES: dict[str, dict[str, str]] = {
     },
     "thithi": {
         "bg": "#F8E0DD", "text": "#4c4f69",
-        "border": BORDER_LIGHT, "link": "#6a8af0",
+        "border": BORDER_LIGHT, "link": "#6d54e9",
         "surface0": "#d8dae2", "surface1": "#d0d4dd", "surface2": "#b0b4be",
         "blue": "#6d54e9", "green": "#44B17E", "orange": "#ffb96e",
         "purple": "#8868b8", "red": "#ff739d", "teal": "#489898",
