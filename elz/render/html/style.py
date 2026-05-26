@@ -83,13 +83,16 @@ _MARKDOWN_CSS = f"""
 :is({_CONTENT_SCOPES}) li > span.math {{ display: inline-block; margin: 0; padding-top: calc(var(--el-gap) * {_GAP_STANDARD / 4}); padding-bottom: calc(var(--el-gap) * {_GAP_STANDARD / 4}); }}
 :is({_CONTENT_SCOPES}) pre {{ margin-bottom: 0; }}
 :is({_CONTENT_SCOPES}) blockquote {{ margin-bottom: 0; padding: 0 1em; opacity: var(--el-opacity); }}
-:is({_CONTENT_SCOPES}) table {{ margin-bottom: 0; border-collapse: collapse; width: 100%; }}
-:is({_CONTENT_SCOPES}) table {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
-:is({_CONTENT_SCOPES}) th, :is({_CONTENT_SCOPES}) td {{ padding: calc(var(--el-padding) * {_CELL_PADDING}) var(--el-padding); border: 1px solid var(--el-border); }}
-:is({_CONTENT_SCOPES}) code {{ padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); }}
-:is({_CONTENT_SCOPES}) pre code {{ padding: 0; border-radius: 0; font-size: inherit; }}
+:where({_CONTENT_SCOPES}) table {{ margin-bottom: 0; border-collapse: separate; border-spacing: 0; width: 100%; border: 1px solid var(--el-border); border-radius: var(--el-border-radius); overflow: hidden; }}
+:where({_CONTENT_SCOPES}) table {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
+:is({_CONTENT_SCOPES}) th {{ padding: calc(var(--el-padding) * {_CELL_PADDING}) var(--el-padding); border: none; border-right: 1px solid var(--el-border); border-bottom: 1px solid var(--el-border); background: rgba(128,128,128,0.04); text-align: center; }}
+:is({_CONTENT_SCOPES}) td {{ padding: calc(var(--el-padding) * {_CELL_PADDING}) var(--el-padding); border: none; border-right: 1px solid var(--el-border); border-bottom: 1px solid var(--el-border); }}
+:is({_CONTENT_SCOPES}) th:last-child, :is({_CONTENT_SCOPES}) td:last-child {{ border-right: none; }}
+:is({_CONTENT_SCOPES}) tbody tr:last-child td, :is({_CONTENT_SCOPES}) tfoot tr:last-child th, :is({_CONTENT_SCOPES}) tfoot tr:last-child td {{ border-bottom: none; }}
+:is({_CONTENT_SCOPES}) code {{ padding: 0.15em 0.3em; border-radius: calc(var(--el-border-radius) * 0.3); color: var(--el-code-color); font-size: var(--el-code-size); font-family: var(--el-code-family); }}
+:is({_CONTENT_SCOPES}) pre code {{ padding: 0; border-radius: 0; font-size: inherit; background: transparent; color: inherit; }}
 :is({_CONTENT_SCOPES}) hr {{ margin-bottom: 0; border: none; border-top: 1px solid; opacity: calc(var(--el-opacity) * 0.35); }}
-:is({_CONTENT_SCOPES}) a {{ color: inherit; }}
+:is({_CONTENT_SCOPES}) a {{ color: var(--el-link-color); }}
 :is({_CONTENT_SCOPES}) img {{ max-width: 100%; }}
 :is({_CONTENT_SCOPES}) .highlight {{
     background: var(--el-code-bg);
@@ -110,7 +113,7 @@ _MARKDOWN_CSS = f"""
 
 _RHYTHM_CSS = f"""
 /* Standard vertical rhythm — everything gets margin-top: 0.5×gap */
-:is({_CONTENT_SCOPES}) > * {{
+:where({_CONTENT_SCOPES}) > * {{
     margin-top: calc(var(--el-gap) * {_GAP_STANDARD});
     margin-bottom: 0;
 }}
