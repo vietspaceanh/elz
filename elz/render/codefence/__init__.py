@@ -111,7 +111,7 @@ def _lang_badge(lang: str) -> str:
         return f'<span class="el-code-lang-badge">{icon}<span>{html.escape(text)}</span></span>'
     return f'<span class="el-code-lang-badge">{html.escape(text)}</span>'
 
-_md: mistune.Markdown | None = None
+
 
 
 @functools.lru_cache(maxsize=512)
@@ -135,7 +135,7 @@ def _render_mermaid(text: str) -> str:
     mermaid_theme = "dark" if dark else "default"
     payload = json.dumps({
         "code": text,
-        "mermaid": json.dumps({"theme": mermaid_theme}),
+        "mermaid": json.dumps({"theme": mermaid_theme, "layout": "elk"}),
         "updateEditor": False,
         "autoSync": True,
         "updateDiagram": True,
@@ -144,14 +144,179 @@ def _render_mermaid(text: str) -> str:
     b64 = base64.urlsafe_b64encode(compressed).decode("ascii").rstrip("=")
     svg_url = f"https://mermaid.ink/svg/pako:{b64}?bgColor={bg[1:]}"
     return f"""<div class="g-wrap"
-     onwheel="var i=this.querySelector('img');var s=parseFloat(this.dataset.s)||1;s=Math.max(0.2,Math.min(10,s*(event.deltaY>0?0.9:1.1)));this.dataset.s=s;i.style.transform='translate('+(parseFloat(this.dataset.tx)||0)+'px,'+(parseFloat(this.dataset.ty)||0)+'px) scale('+s+')';event.preventDefault()"
-     onmousedown="this.dataset.dx=event.clientX-(parseFloat(this.dataset.tx)||0);this.dataset.dy=event.clientY-(parseFloat(this.dataset.ty)||0);this.dataset.drag=1;this.style.cursor='grabbing';event.preventDefault()"
-     onmousemove="if(this.dataset.drag=='1'){{var tx=event.clientX-(parseFloat(this.dataset.dx)||0);var ty=event.clientY-(parseFloat(this.dataset.dy)||0);this.dataset.tx=tx;this.dataset.ty=ty;this.querySelector('img').style.transform='translate('+tx+'px,'+ty+'px) scale('+(parseFloat(this.dataset.s)||1)+')'}}"
-     onmouseup="this.dataset.drag=0;this.style.cursor='grab'"
-     onmouseleave="this.dataset.drag=0;this.style.cursor='grab'">
-      <img src="{svg_url}" alt="graph">
+      onwheel="
+       var i = this.querySelector('img');
+       var oldS = parseFloat(this.dataset.s) || 1;
+       var s = Math.max(0.2, Math.min(10, oldS * (event.deltaY > 0 ? 0.9 : 1.1)));
+       this.dataset.s = s;
+       var cr = i.getBoundingClientRect();
+       var cx = event.clientX - cr.left - cr.width / 2;
+       var cy = event.clientY - cr.top - cr.height / 2;
+       var oldTx = parseFloat(this.dataset.tx) || 0;
+       var oldTy = parseFloat(this.dataset.ty) || 0;
+       var tx = oldTx + cx * (1 - s / oldS);
+       var ty = oldTy + cy * (1 - s / oldS);
+       this.dataset.tx = tx;
+       this.dataset.ty = ty;
+       i.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+       event.preventDefault()
+      "
+     onmousedown="
+      this.dataset.dx = event.clientX - (parseFloat(this.dataset.tx) || 0);
+      this.dataset.dy = event.clientY - (parseFloat(this.dataset.ty) || 0);
+      this.dataset.drag = 1;
+      this.style.cursor = 'grabbing';
+      event.preventDefault()
+     "
+     onmousemove="
+      if (this.dataset.drag == '1') {{
+        var tx = event.clientX - (parseFloat(this.dataset.dx) || 0);
+        var ty = event.clientY - (parseFloat(this.dataset.dy) || 0);
+        this.dataset.tx = tx;
+        this.dataset.ty = ty;
+        this.querySelector('img').style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + (parseFloat(this.dataset.s) || 1) + ')';
+      }}
+     "
+     onmouseup="
+      this.dataset.drag = 0;
+      this.style.cursor = 'grab'
+     "
+     onmouseleave="
+      this.dataset.drag = 0;
+      this.style.cursor = 'grab'
+     ">
+      <img src="{svg_url}" alt="graph" onload="this.parentElement.classList.add('loaded')">
       <button class="g-btn" title="Toggle full screen"
-        onclick="event.stopPropagation();var g=this.parentElement;var fs=document.fullscreenElement||document.webkitFullscreenElement;if(fs==g){{if(document.exitFullscreen)document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen()}}else{{if(g.requestFullscreen)g.requestFullscreen();else if(g.webkitRequestFullscreen)g.webkitRequestFullscreen()}}">&#x26F6; Full screen</button>
+        onclick="
+          event.stopPropagation();
+          (function(g) {{
+            try {{
+              var i = g.querySelector('img');
+              if (!i) return;
+              var s = i.getAttribute('src');
+
+              var o = document.querySelector('.el-overlay');
+              if (o) {{
+                try {{
+                  if (o._c) o._c();
+                  o.remove();
+                }} catch (e) {{}}
+                return;
+              }}
+
+              o = document.createElement('div');
+              o.className = 'el-overlay';
+              var bg = getComputedStyle(g).backgroundColor || '#1f1f28';
+              o.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:' + bg + ';display:flex;align-items:center;justify-content:center';
+
+              var r = g.getBoundingClientRect();
+              var t = Math.max(0, r.top + r.height / 2 - window.innerHeight / 2);
+              o.style.paddingTop = t + 'px';
+              o.setAttribute('tabindex', '-1');
+
+              var initZ = parseFloat(g.dataset.s) || 1;
+              var initTx = parseFloat(g.dataset.tx) || 0;
+              var initTy = parseFloat(g.dataset.ty) || 0;
+              o.dataset.z = initZ;
+              o.dataset.tx = initTx;
+              o.dataset.ty = initTy;
+
+              o.onwheel = function(e) {{
+                var oldZ = parseFloat(this.dataset.z) || 1;
+                var z = Math.max(0.2, Math.min(10, oldZ * (e.deltaY > 0 ? 0.9 : 1.1)));
+                this.dataset.z = z;
+                var cr = c.getBoundingClientRect();
+                var cx = e.clientX - cr.left - cr.width / 2;
+                var cy = e.clientY - cr.top - cr.height / 2;
+                var oldTx = parseFloat(this.dataset.tx) || 0;
+                var oldTy = parseFloat(this.dataset.ty) || 0;
+                var tx = oldTx + cx * (1 - z / oldZ);
+                var ty = oldTy + cy * (1 - z / oldZ);
+                this.dataset.tx = tx;
+                this.dataset.ty = ty;
+                c.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + z + ')';
+                e.preventDefault()
+              }};
+              o.ontouchmove = function(e) {{ e.preventDefault() }};
+              o.onmousedown = function(e) {{
+                this.dataset.dx = e.clientX - (parseFloat(this.dataset.tx) || 0);
+                this.dataset.dy = e.clientY - (parseFloat(this.dataset.ty) || 0);
+                this.dataset.drag = 1;
+                this.style.cursor = 'grabbing';
+                e.preventDefault()
+              }};
+
+              var c = document.createElement('img');
+              c.src = s;
+              c.style.cssText = 'width:100%;height:100%;max-width:90vw;max-height:85vh;object-fit:contain;border-radius:4px;pointer-events:none;user-select:none';
+              c.draggable = false;
+              c.style.transform = 'translate(' + initTx + 'px,' + initTy + 'px) scale(' + initZ + ')';
+
+              var onmove = function(e) {{
+                if (o.dataset.drag == '1') {{
+                  var tx = e.clientX - (parseFloat(o.dataset.dx) || 0);
+                  var ty = e.clientY - (parseFloat(o.dataset.dy) || 0);
+                  var z = parseFloat(o.dataset.z) || 1;
+                  o.dataset.tx = tx;
+                  o.dataset.ty = ty;
+                  c.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + z + ')';
+                }}
+              }};
+
+              var onup = function() {{
+                o.dataset.drag = 0;
+                o.style.cursor = 'default'
+              }};
+
+              o._c = function() {{
+                document.removeEventListener('mousemove', onmove);
+                document.removeEventListener('mouseup', onup);
+                document.removeEventListener('keydown', k);
+                window.removeEventListener('blur', bFn)
+              }};
+
+              document.addEventListener('mousemove', onmove);
+              document.addEventListener('mouseup', onup);
+
+              o.appendChild(c);
+
+              var x = document.createElement('button');
+              x.innerHTML = '&#x2715;';
+              x.style.cssText = 'position:fixed;top:12px;right:12px;z-index:1;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1';
+              x.onclick = function(e) {{
+                e.stopPropagation();
+                try {{
+                  if (o._c) o._c();
+                  o.remove();
+                }} catch (e) {{}}
+              }};
+              o.appendChild(x);
+
+              var k = function(e) {{
+                if (e.key === 'Escape') {{
+                  try {{
+                    if (o._c) o._c();
+                    o.remove();
+                  }} catch (e) {{}}
+                }}
+              }};
+              document.addEventListener('keydown', k);
+
+              var bFn = function() {{
+                try {{
+                  if (o._c) o._c();
+                  o.remove();
+                }} catch (e) {{}}
+              }};
+              if (/electron/i.test(navigator.userAgent) || typeof window.acquireVsCodeApi === 'function') {{
+                window.addEventListener('blur', bFn);
+              }}
+
+              document.body.appendChild(o);
+              o.focus()
+            }} catch (e) {{}}
+          }})(this.parentElement)
+        ">&#x26F6; Full screen</button>
     </div>"""
 
 
@@ -203,12 +368,4 @@ def _heading_slugify(text: str) -> str:
     return re.sub(r'[-\s]+', '-', text)
 
 
-def get_md() -> mistune.Markdown:
-    global _md
-    if _md is None:
-        _md = mistune.create_markdown(escape=False, plugins=[_codefence_plugin, _table_plugin.table, _math_plugin])
-        def _heading_with_id(text, level, **attrs):
-            slug = _heading_slugify(text)
-            return f'<h{level} id="{slug}">{text}</h{level}>'
-        _md.renderer.heading = _heading_with_id
-    return _md
+md = mistune.create_markdown(escape=False, plugins=[_codefence_plugin, _table_plugin.table, _math_plugin])

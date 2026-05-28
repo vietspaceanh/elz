@@ -145,7 +145,13 @@ _MERMAID_CSS = """
           background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
           border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
           color: #ddd; font-size: 0.8em; padding: 3px 10px;
-          cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+          cursor: pointer; opacity: 0; transition: opacity 0.2s; }
+.g-wrap:not(.loaded)::before { content: 'Loading\u2026'; position: absolute; inset: 0; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--el-text); opacity: 0.45; font-size: 0.85em; }
+.g-wrap:not(.loaded) img { opacity: 0; }
+.g-wrap.loaded img { opacity: 1; transition: opacity 0.3s; }
+.g-wrap:hover .g-btn { opacity: 1; }
 .g-btn:hover { opacity: 1; color: #fff; }
 """
 
