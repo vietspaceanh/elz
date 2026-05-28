@@ -21,6 +21,9 @@ SLOT_RE = re.compile(r"__ELF_(\d+)__")
 
 
 @typing.overload
+def el(func: typing.Callable[[], str | Element]) -> Element: ...
+
+@typing.overload
 def el(func: typing.Callable[P, str]) -> typing.Callable[P, Element]: ...
 
 @typing.overload
@@ -29,7 +32,7 @@ def el(func: str) -> Element: ...
 @typing.overload
 def el(func: typing.Any) -> Element: ...
 
-def el(func: typing.Callable[P, str] | str | typing.Any) -> typing.Callable[P, Element] | Element:
+def el(func: typing.Callable[P, str] | str) -> typing.Callable[P, Element] | Element:
     if isinstance(func, str):
         fmt, content = _parse(func)
         frame = inspect.currentframe().f_back
