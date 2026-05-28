@@ -5,7 +5,6 @@ import inspect
 import os
 import re
 import sys
-import textwrap
 import typing
 from dataclasses import replace
 
@@ -336,7 +335,17 @@ def _reindex_slots(content: str, deps: list) -> tuple[str, list]:
 
 def _parse(raw: str) -> tuple[str, str]:
     def _dedent(text: str) -> str:
-        return textwrap.dedent(text).strip()
+        lines = text.split("\n")
+        base = 0
+        for line in lines:
+            stripped = line.lstrip()
+            if stripped:
+                base = len(line) - len(stripped)
+                break
+        if base:
+            out = [line[base:] if line and (len(line) - len(line.lstrip())) >= base else line for line in lines]
+            return "\n".join(out).strip()
+        return text.strip()
 
     for p in PREFIXES:
         if raw.startswith(p):
