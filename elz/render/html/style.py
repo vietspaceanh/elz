@@ -125,7 +125,7 @@ _RHYTHM_CSS = f"""
 :is({_CONTENT_SCOPES}) h4 {{ margin-top: {_H4_TOP_EM}em; }}
 
 /* Tighter spacing between paragraph and following list */
-:is({_CONTENT_SCOPES}) p + ul, :is({_CONTENT_SCOPES}) p + ol {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD} / 4); }}
+:is({_CONTENT_SCOPES}) > p + ul, :is({_CONTENT_SCOPES}) > p + ol {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD} / 4); }}
 
 /* Flex/grid containers follow the standard gap */
 .el > div[style*="display:flex"],
