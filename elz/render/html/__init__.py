@@ -3,14 +3,32 @@ from __future__ import annotations
 import html
 import os
 import re
-import mistune
 
 from ...specs import ElementSpec
 from ..css import collect_component_css, wrap_scope
-from ..codefence import get_md, process_pyg, restore_pyg
+from ..codefence import md, process_pyg, restore_pyg, _heading_slugify
 from ..theme import theme
 
 _SLOT_RE = re.compile(r"__ELF_(\d+)__")
+
+
+def _render_markdown(text: str) -> str:
+    slug_counts: dict[str, int] = {}
+    original = md.renderer.heading
+
+    def _heading(text, level, **attrs):
+        slug = _heading_slugify(text)
+        n = slug_counts.get(slug, 0) + 1
+        slug_counts[slug] = n
+        if n > 1:
+            slug = f"{slug}-{n}"
+        return f'<h{level} id="{slug}">{text}</h{level}>'
+
+    md.renderer.heading = _heading
+    try:
+        return md(text)
+    finally:
+        md.renderer.heading = original
 
 
 def render_full_html(spec: ElementSpec, dev_mode: bool = True) -> str:
@@ -32,20 +50,18 @@ renderMathInElement(document.body,{delimiters:[{left:"\\\\(",right:"\\\\)",displ
 
 
 def render_fragment(spec: ElementSpec, dev_mode: bool = True, child_html: list[str] | None = None,
-                   codes: dict[str, str] | None = None, md: mistune.Markdown | None = None) -> str:
+                   codes: dict[str, str] | None = None) -> str:
     if codes is None:
         codes = {}
-    if md is None:
-        md = get_md()
     content = spec.adhoc_fn() if spec.adhoc_fn else (spec.content or "")
     if not spec.deps:
-        body = _render_text(content, spec.format, codes, md)
+        body = _render_text(content, spec.format, codes)
     elif _is_flat_template(content):
-        body = _render_rows(spec, content, dev_mode, codes, md, child_html)
+        body = _render_rows(spec, content, dev_mode, codes, child_html)
     else:
         if child_html is None:
-            child_html = [render_fragment(d, dev_mode, None, codes, md) for d in spec.deps]
-        body = _fill_slots(content, child_html, spec.format, codes, md)
+            child_html = [render_fragment(d, dev_mode, None, codes) for d in spec.deps]
+        body = _fill_slots(content, child_html, spec.format, codes)
     body = wrap_scope(body, spec)
     return _maybe_wrap_dev_child(body, spec, dev_mode)
 
@@ -90,19 +106,19 @@ def _is_flat_template(content: str) -> bool:
     return True
 
 
-def _render_text(text: str, fmt: str, codes: dict[str, str], md: mistune.Markdown) -> str:
+def _render_text(text: str, fmt: str, codes: dict[str, str]) -> str:
     rendered = process_pyg(text, codes)
     if fmt != "html":
-        rendered = md(rendered)
+        rendered = _render_markdown(rendered)
     return restore_pyg(rendered, codes)
 
 
-def _fill_slots(content: str, children: list[str], fmt: str, codes: dict, md) -> str:
+def _fill_slots(content: str, children: list[str], fmt: str, codes: dict) -> str:
     parts = _SLOT_RE.split(content)
     result = []
     for i, part in enumerate(parts):
         if i % 2 == 0:
-            result.append(_render_text(part, fmt, codes, md))
+            result.append(_render_text(part, fmt, codes))
         else:
             result.append(children[int(part)])
     return "".join(result)
@@ -128,7 +144,7 @@ def _split_into_rows(content: str) -> list[tuple]:
     return groups
 
 
-def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, md,
+def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict,
                          child_html: list[str] | None = None) -> str:
     groups = _split_into_rows(content)
     results = []
@@ -136,7 +152,7 @@ def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, m
         if gtype == "text":
             if not gcontent.strip():
                 continue
-            html = _fill_slots(gcontent, [], spec.format, codes, md)
+            html = _fill_slots(gcontent, [], spec.format, codes)
             results.append(f'    <div class="el-text">{html}</div>')
         else:
             def _remap(m):
@@ -145,8 +161,8 @@ def _render_rows(spec: ElementSpec, content: str, dev_mode: bool, codes: dict, m
             if child_html is not None:
                 children = [child_html[i] for i in indices]
             else:
-                children = [render_fragment(spec.deps[i], dev_mode, None, codes, md) for i in indices]
-            html = _fill_slots(_SLOT_RE.sub(_remap, gcontent), children, spec.format, codes, md)
+                children = [render_fragment(spec.deps[i], dev_mode, None, codes) for i in indices]
+            html = _fill_slots(_SLOT_RE.sub(_remap, gcontent), children, spec.format, codes)
 
             if has_multiple:
                 results.append(f'    <div class="el-row">{html}</div>')

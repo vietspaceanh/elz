@@ -53,6 +53,32 @@ def _render_toc_tree(headings: list[tuple[int, str, str]]) -> str:
     return result
 
 
+def _scrollspy_img() -> str:
+    js = (
+        "(function(e){"
+        "var r=e.previousElementSibling;"
+        "if(!r||!r.classList.contains('el-root')){e.remove();return}"
+        "e.remove();"
+        "function s(){"
+        "var l=Array.from(r.querySelectorAll('a')).filter(function(a){return a.getAttribute('href')&&a.getAttribute('href').charAt(0)==='#'});"
+        "if(!l.length)return;"
+        "var ids=l.map(function(a){return a.getAttribute('href').slice(1)});"
+        "var hs=ids.map(function(id){return document.getElementById(id)}).filter(Boolean);"
+        "if(!hs.length)return;"
+        "var cur=null;"
+        "function a(id){if(id===cur)return;cur=id;l.forEach(function(x){x.classList.toggle('el-active',x.getAttribute('href')==='#'+id)})}"
+        "function u(){var c=null;for(var i=0;i<hs.length;i++){if(hs[i].getBoundingClientRect().top<=1)c=hs[i].id}if(c)a(c)}"
+        "var t=false;"
+        "window.addEventListener('scroll',function(){if(!t){requestAnimationFrame(function(){u();t=false});t=true}},{passive:true});"
+        "u()"
+        "}"
+        "if(document.readyState!=='loading')s();"
+        "else document.addEventListener('DOMContentLoaded',s)"
+        "})(this)"
+    )
+    return f'<img style="display:none" src="x" onerror="{js}">'
+
+
 def _drawer_html(title: str, tree_html: str) -> str:
     return f"""html
     <div class="el-root">
@@ -89,9 +115,14 @@ def _drawer_css(position: str) -> str:
     .el-drawer-h {{ display: flex; justify-content: space-between; align-items: center; }}
     .el-drawer-h h3 {{ margin: 0; font-size: 1.1em; font-weight: 600; }}
     .el-root ul {{ list-style: none; padding: 0; margin: 0; }}
-    .el-root ul ul {{ padding-left: calc(var(--el-indent) * 1); }}
+    .el-root li {{ position: relative; padding: 2px 0; }}
+    .el-root ul ul > li {{ padding-left: 1.4em; }}
+    .el-root ul ul > li::before {{ content: ''; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--el-border); }}
+    .el-root ul ul > li:last-child::before {{ height: .75em; bottom: auto; }}
+    .el-root ul ul > li::after {{ content: ''; position: absolute; top: .65em; left: 0; width: .9em; border-top: 1px solid var(--el-border); }}
     a {{ color: var(--el-link-color); text-decoration: none; font-size: .95em; }}
     a:hover {{ text-decoration: underline; }}
+    .el-root a.el-active {{ color: var(--el-accent, #0066cc); font-weight: 600; }}
     @media (max-width: 768px) {{
         .el-hb {{
             display: flex; position: fixed; top: 16px; {hb_edge}; z-index: 999;
@@ -133,4 +164,4 @@ def sidebar(items: list[str] | None = None):
 def toc(element):
     toc.css(_drawer_css("right"))
     headings = _extract_headings(element.get())
-    return _drawer_html("Contents", _render_toc_tree(headings))
+    return _drawer_html("Contents", _render_toc_tree(headings)) + _scrollspy_img()
