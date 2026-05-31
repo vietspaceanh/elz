@@ -50,6 +50,7 @@ def resolve_inline_source(frame):
         found = _search_project(source_text, frame.f_globals)
         if found:
             source = found
+
     return name, source, source_text
 
 
@@ -74,35 +75,25 @@ def _search_project(snippet: str, func_globals: dict) -> tuple[str, int] | None:
     lines = snippet.split("\n")
     if not lines:
         return
-    fingerprint = "\n".join(lines[:_FP_LINES])
+    context_lines = lines[:_FP_LINES]
+    first_line = next((l for l in context_lines if l.strip()), None)
+    if not first_line:
+        return
+    stripped_first = first_line.strip()
     root = _detect_root(func_globals)
     if not root:
         return
-    return _search_rg(fingerprint, root) or _search_fallback(fingerprint, root)
-
-
-def _detect_root(func_globals: dict) -> str:
-    for key in ("__vsc_ipynb_file__", "__file__"):
-        val = func_globals.get(key)
-        if val and os.path.isfile(val):
-            return os.path.dirname(os.path.abspath(val))
-    return os.getcwd()
-
-
-def _search_rg(fingerprint: str, root: str) -> tuple[str, int] | None:
-    fp_lines = fingerprint.split('\n')
     rg_skip = [g for d in sorted(_SKIP_DIRS) for g in ("--glob", f"!{d}/**")]
     try:
         proc = subprocess.run(
-            ["rg", "-n", "--no-heading", "--color", "never", "-F", "-U",
-             "--glob", "*.py",
-             *rg_skip,
-             fingerprint, root],
+            ["rg", "-n", "--no-heading", "--color", "never", "-F",
+             "--glob", "*.py", *rg_skip,
+             stripped_first, root],
             capture_output=True, text=True, timeout=2,
         )
         if proc.returncode == 0 and proc.stdout.strip():
-            for line in proc.stdout.strip().split("\n"):
-                parts = line.split(":", 2)
+            for result in proc.stdout.strip().split("\n"):
+                parts = result.split(":", 2)
                 if len(parts) >= 2:
                     fp = os.path.abspath(parts[0])
                     ln = int(parts[1])
@@ -111,9 +102,10 @@ def _search_rg(fingerprint: str, root: str) -> tuple[str, int] | None:
                             file_lines = f.readlines()
                     except OSError:
                         continue
-                    if all(
-                        file_lines[ln - 1 + i].rstrip() == fp_lines[i]
-                        for i in range(min(len(fp_lines), len(file_lines) - ln + 1))
+                    n = min(len(context_lines), len(file_lines) - ln + 1)
+                    if n > 0 and all(
+                        file_lines[ln - 1 + i].strip() == context_lines[i].strip()
+                        for i in range(n)
                     ):
                         return (fp, ln)
     except (FileNotFoundError, OSError, subprocess.TimeoutExpired):
@@ -121,23 +113,9 @@ def _search_rg(fingerprint: str, root: str) -> tuple[str, int] | None:
     return
 
 
-def _search_fallback(fingerprint: str, root: str) -> tuple[str, int] | None:
-    fp_lines = fingerprint.split('\n')
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if not d.startswith(".") and d not in _SKIP_DIRS]
-        for f in filenames:
-            if not f.endswith(".py"):
-                continue
-            p = os.path.join(dirpath, f)
-            try:
-                with open(p, errors="ignore") as fp:
-                    file_lines = fp.readlines()
-            except OSError:
-                continue
-            for i in range(len(file_lines) - len(fp_lines) + 1):
-                if all(
-                    file_lines[i + j].rstrip() == fp_lines[j]
-                    for j in range(len(fp_lines))
-                ):
-                    return (os.path.abspath(p), i + 1)
-    return
+def _detect_root(func_globals: dict) -> str:
+    for key in ("__vsc_ipynb_file__", "__file__"):
+        val = func_globals.get(key)
+        if val and os.path.isfile(val):
+            return os.path.dirname(os.path.abspath(val))
+    return os.getcwd()
