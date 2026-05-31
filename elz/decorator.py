@@ -85,9 +85,10 @@ def el(func: typing.Callable[P, str] | str) -> typing.Callable[P, Element] | Ele
         else:
             source_text = None
 
+        unique_name = f"{label}@{source[0]}:{source[1]}" if source else label
         spec = ElementSpec(
             func_name=label,
-            name=label,
+            name=unique_name,
             format="html",
             source=source,
             source_text=source_text,
