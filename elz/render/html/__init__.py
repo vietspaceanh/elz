@@ -78,13 +78,15 @@ def display_name(func_name: str | None) -> str:
 
 
 def _render_badge(spec: ElementSpec, name: str) -> str:
-    if spec.source and os.path.isfile(spec.source[0]):
+    if spec.source:
         filepath, lineno = spec.source
-        return (
-            f'<a href="{html.escape(filepath)}:{lineno}"'
-            f' class="el-dev-link"'
-            f' title="{html.escape(filepath)}:{lineno}">{name}</a>'
-        )
+        filepath = os.path.abspath(filepath)
+        if os.path.isfile(filepath):
+            return (
+                f'<a href="{html.escape(filepath)}:{lineno}"'
+                f' class="el-dev-link"'
+                f' title="{html.escape(filepath)}:{lineno}">{name}</a>'
+            )
     return f'<span class="el-dev-link">{name}</span>'
 
 
