@@ -67,7 +67,6 @@ class Element:
         if stack:
             deps = stack[-1]
             idx = len(deps)
-            self.spec.content = self.get()
             deps.append(self.spec)
             return f"__ELF_{idx}__"
         return self.get()
