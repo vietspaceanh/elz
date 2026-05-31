@@ -119,11 +119,21 @@ class Element:
             el = self._copy()
             el.spec.weight = modifier
             return el
+        if isinstance(modifier, Mods):
+            el = self._copy()
+            el.spec.mods = (el.spec.mods or Mods()).merge(modifier)
+            return el
         if isinstance(modifier, str):
             el = self._copy()
             mods = el.spec.mods or Mods()
             el.spec.mods = mods.merge(Mods.parse(modifier))
             return el
+        if callable(modifier):
+            el = self._copy()
+            result = modifier()
+            if isinstance(result, Mods):
+                el.spec.mods = (el.spec.mods or Mods()).merge(result)
+                return el
         return NotImplemented
 
     def __matmul__(self, modifier):

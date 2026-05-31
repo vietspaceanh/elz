@@ -17,9 +17,9 @@ _CELL_PADDING = 0.6
 _LIST_INDENT = 2
 
 # All structural wrapper classes are transparent (no margin on themselves)
-_TRANSPARENT_WRAPPERS = ".el-row, .el-grid-item, .el-dev, .el-fold-section, .el-text"
+_TRANSPARENT_WRAPPERS = ".el-row, .el-grid-item, .el-dev, .el-fold-section, .el-text, .el-mods"
 # All containers that can hold markdown-rendered content
-_CONTENT_SCOPES = ".el, .el-dev, .el-row, .el-fold-section, .el-grid-item, .el-text"
+_CONTENT_SCOPES = ".el, .el-dev, .el-row, .el-fold-section, .el-grid-item, .el-text, .el-mods"
 
 _PAGE_CSS = f"""
 /* Root container */
