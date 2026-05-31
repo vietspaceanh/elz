@@ -136,12 +136,6 @@ class Element:
                 return el
         return NotImplemented
 
-    def __matmul__(self, modifier):
-        return self._apply_modifier(modifier)
-
-    def __rmatmul__(self, modifier):
-        return self._apply_modifier(modifier)
-
     def __bool__(self):
         return True
 
@@ -178,6 +172,11 @@ class Element:
 
         with open(path, "w", encoding="utf-8") as f:
             f.write(full)
+
+# Defined after class to avoid Pylance semantic token highlighting issue with @
+# when there is typing.overload
+Element.__matmul__ = Element._apply_modifier
+Element.__rmatmul__ = Element._apply_modifier
 
 
 def root(body: Element) -> Element:
