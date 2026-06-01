@@ -43,7 +43,7 @@ def render_full_html(spec: ElementSpec, dev_mode: bool = True) -> str:
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 <script>
-renderMathInElement(document.body,{delimiters:[{left:"\\\\(",right:"\\\\)",display:false},{left:"$$",right:"$$",display:true}]})
+renderMathInElement(document.body,{delimiters:[{left:"\\\\(",right:"\\\\)",display:false},{left:"\\\\[",right:"\\\\]",display:true},{left:"$$",right:"$$",display:true}]})
 </script>"""
 
     return f'<style>{style}</style>\n{katex}\n{body}'

@@ -9,16 +9,14 @@ import json
 
 import mistune
 import pygments
-from mistune.plugins import table as _table_plugin
-from mistune.plugins.math import math as _math_plugin
 from pygments.lexers import get_lexer_by_name
-
+from mistune.plugins import table as _table_plugin
+from mistune.plugins.math import math as _upstream_math_plugin
 from .lexer import ElfPythonLexer
 from ..theme import theme
 
 PYG_RE = re.compile(r"py`([^`]+)`")
 PYG_PH_RE = re.compile(r"<!--PYG_(\d+)-->")
-
 _COPY_BTN = """<button class="el-code-copy" title="Copy code" onclick="(function(b){
 var w=b.closest('.el-code-wrap');
 var c=w.querySelector('.highlight');
@@ -34,6 +32,7 @@ setTimeout(function(){b.classList.remove('el-code-copied');},2000);
 _DEVICON_CDN = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons"
 _DOC_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>'
 _TERM_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>'
+
 
 def _devicon(path: str) -> str:
     return f'<img src="{_DEVICON_CDN}/{path}.svg" alt="" class="el-code-lang-icon">'
@@ -342,11 +341,6 @@ def _codefence_plugin(md):
     md.renderer.block_code = render_codefence
 
 
-def _heading_slugify(text: str) -> str:
-    text = re.sub(r'[^\w\s-]', '', text).strip().lower()
-    return re.sub(r'[-\s]+', '-', text)
-
-
 # Relax CommonMark's 0-3 space indentation limit on fenced code blocks,
 # so indented closing fences (common in Python triple-quoted strings) are
 # still recognized as fence terminators instead of literal content.
@@ -361,6 +355,26 @@ class _RelaxedBlockParser(mistune.block_parser.BlockParser):
         state.src = state.src[:cursor] + re.sub(
             r'^ +(`{3,}|~{3,})\s*$', r'\1', state.src[cursor:], flags=re.MULTILINE)
         return super().parse_fenced_code(m, state)
+
+
+def _math_plugin(md):
+    def _render_display_inline_math(_, text):
+        return r'<span class="math">\[' + text + r"\]</span>"
+
+    display_inline_math_pattern = r"\$\$(?!\s)(?P<display_math_text>.+?)(?!\s)\$\$"
+
+    _upstream_math_plugin(md)
+    md.inline.register(
+        "display_inline_math",
+        display_inline_math_pattern,
+        lambda _, m, state: (
+            state.append_token({"type": "display_inline_math", "raw": m.group("display_math_text")})
+            or m.end()
+        ),
+        before="inline_math",
+    )
+    if md.renderer and md.renderer.NAME == "html":
+        md.renderer.register("display_inline_math", _render_display_inline_math)
 
 
 md = mistune.Markdown(
