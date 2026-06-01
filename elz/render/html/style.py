@@ -100,6 +100,7 @@ _MARKDOWN_CSS = f"""
     border-radius: var(--el-border-radius);
     padding: var(--el-padding);
 }}
+.el-code-wrap .highlight {{ border: none; border-radius: 0 0 var(--el-border-radius) var(--el-border-radius); }}
 :is({_CONTENT_SCOPES}) .highlight pre {{
     margin: 0;
     font-family: var(--el-code-family);
@@ -179,7 +180,8 @@ _DEV_CSS = """
 _CODEFENCE_CSS = f"""
 /* 0.5em is the size of the code badge */
 .el-code-wrap {{
-    position: relative; border-radius: var(--el-border-radius);
+    position: relative; border: 1px solid var(--el-border);
+    border-radius: var(--el-border-radius);
     margin-top: calc(var(--el-gap) * {_GAP_STANDARD} + 0.5em);
 }}
 """ + """
