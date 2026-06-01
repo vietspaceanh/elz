@@ -31,87 +31,60 @@ setTimeout(function(){b.classList.remove('el-code-copied');},2000);
 <span class="el-code-copy-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='9' y='9' width='13' height='13' rx='2' ry='2'/><path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/></svg></span>
 <span class="el-code-check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg></span>
 </button>"""
-
-_DEVICON_URLS: dict[str, str] = {
-    "python": "python/python-original",
-    "javascript": "javascript/javascript-original",
-    "js": "javascript/javascript-original",
-    "typescript": "typescript/typescript-original",
-    "ts": "typescript/typescript-original",
-    "go": "go/go-original-wordmark",
-    "rust": "rust/rust-original",
-    "html": "html5/html5-original",
-    "css": "css3/css3-original",
-    "bash": "bash/bash-original",
-    "sh": "bash/bash-original",
-    "shell": "bash/bash-original",
-    "zsh": "bash/bash-original",
-    "json": "json/json-original",
-    "yaml": "yaml/yaml-original",
-    "yml": "yaml/yaml-original",
-    "markdown": "markdown/markdown-original",
-    "md": "markdown/markdown-original",
-    "ruby": "ruby/ruby-original",
-    "rb": "ruby/ruby-original",
-    "java": "java/java-original",
-    "kotlin": "kotlin/kotlin-original",
-    "scala": "scala/scala-original",
-    "swift": "swift/swift-original",
-    "php": "php/php-original",
-    "r": "r/r-original",
-    "dart": "dart/dart-original",
-    "elixir": "elixir/elixir-original",
-    "haskell": "haskell/haskell-original",
-    "lua": "lua/lua-original",
-    "perl": "perl/perl-original",
-    "matlab": "matlab/matlab-original",
-    "dockerfile": "docker/docker-original",
-    "sql": "azuresqldatabase/azuresqldatabase-original",
-}
-
-_LANG_ICONS: dict[str, str] = {
-    "python": "py",
-    "javascript": "js", "js": "js",
-    "typescript": "ts", "ts": "ts",
-    "go": "go",
-    "rust": "rs",
-    "sql": "sql",
-    "html": "html",
-    "css": "css",
-    "bash": "$", "sh": "$", "shell": "$", "zsh": "$",
-    "json": "{}",
-    "yaml": "ym", "yml": "ym",
-    "markdown": "md", "md": "md",
-    "ruby": "rb", "rb": "rb",
-    "java": "java",
-    "kotlin": "kt",
-    "scala": "scala",
-    "swift": "swift",
-    "php": "php",
-    "r": "r",
-    "dart": "dart",
-    "elixir": "ex",
-    "haskell": "hs",
-    "lua": "lua",
-    "perl": "perl",
-    "matlab": "matlab",
-    "dockerfile": "docker",
-    "makefile": "make",
-}
-
-
 _DEVICON_CDN = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons"
+_DOC_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>'
+_TERM_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>'
+
+def _devicon(path: str) -> str:
+    return f'<img src="{_DEVICON_CDN}/{path}.svg" alt="" class="el-code-lang-icon">'
+
+_LANG: dict[str, tuple[str, str]] = {
+    "python":     ("py", _devicon("python/python-original")),
+    "javascript": ("js", _devicon("javascript/javascript-original")),
+    "js":         ("js", _devicon("javascript/javascript-original")),
+    "typescript": ("ts", _devicon("typescript/typescript-original")),
+    "ts":         ("ts", _devicon("typescript/typescript-original")),
+    "go":         ("go", _devicon("go/go-original-wordmark")),
+    "rust":       ("rs", _devicon("rust/rust-original")),
+    "html":       ("html", _devicon("html5/html5-original")),
+    "css":        ("css", _devicon("css3/css3-original")),
+    "bash":       ("sh", _TERM_ICON),
+    "sh":         ("sh", _TERM_ICON),
+    "shell":      ("sh", _TERM_ICON),
+    "zsh":        ("sh", _TERM_ICON),
+    "json":       ("json", _devicon("json/json-original")),
+    "yaml":       ("yaml", _devicon("yaml/yaml-original")),
+    "yml":        ("yaml", _devicon("yaml/yaml-original")),
+    "markdown":   ("md", _devicon("markdown/markdown-original")),
+    "md":         ("md", _devicon("markdown/markdown-original")),
+    "ruby":       ("rb", _devicon("ruby/ruby-original")),
+    "rb":         ("rb", _devicon("ruby/ruby-original")),
+    "java":       ("java", _devicon("java/java-original")),
+    "kotlin":     ("kt", _devicon("kotlin/kotlin-original")),
+    "scala":      ("scala", _devicon("scala/scala-original")),
+    "swift":      ("swift", _devicon("swift/swift-original")),
+    "php":        ("php", _devicon("php/php-original")),
+    "r":          ("r", _devicon("r/r-original")),
+    "dart":       ("dart", _devicon("dart/dart-original")),
+    "elixir":     ("ex", _devicon("elixir/elixir-original")),
+    "haskell":    ("hs", _devicon("haskell/haskell-original")),
+    "lua":        ("lua", _devicon("lua/lua-original")),
+    "perl":       ("pl", _devicon("perl/perl-original")),
+    "matlab":     ("m", _devicon("matlab/matlab-original")),
+    "dockerfile": ("Dockerfile", _devicon("docker/docker-original")),
+    "sql":        ("sql", _devicon("azuresqldatabase/azuresqldatabase-original")),
+    "makefile":   ("mk", _DOC_ICON),
+}
+_FALLBACK = ("", _DOC_ICON)
 
 
-def _lang_badge(lang: str) -> str:
-    text = _LANG_ICONS.get(lang, lang[:2].title() if lang else "")
-    path = _DEVICON_URLS.get(lang)
-    if path:
-        icon = f'<img src="{_DEVICON_CDN}/{path}.svg" alt="{html.escape(lang)}" class="el-code-lang-icon">'
-        return f'<span class="el-code-lang-badge">{icon}<span>{html.escape(text)}</span></span>'
-    return f'<span class="el-code-lang-badge">{html.escape(text)}</span>'
-
-
+def _lang_badge(lang: str, filename: str | None = None) -> str:
+    ext, icon = _LANG.get(lang, _FALLBACK)
+    if filename:
+        text = filename if "." in filename else (f"{filename}.{ext}" if ext else filename)
+    else:
+        text = ext or (lang[:2].title() if lang else "")
+    return f'<span class="el-code-lang-badge">{icon}<span>{html.escape(text)}</span></span>'
 
 
 @functools.lru_cache(maxsize=512)
@@ -123,7 +96,11 @@ def _highlight_code_cached(text: str, lang: str, style: str) -> str:
             lexer = get_lexer_by_name(lang, stripall=True) if lang else get_lexer_by_name("text")
         return pygments.highlight(text, lexer, theme.get_formatter())
     except Exception:
-        return f"<pre><code>{html.escape(text)}</code></pre>"
+        try:
+            lexer = get_lexer_by_name("text", stripall=True)
+            return pygments.highlight(text, lexer, theme.get_formatter())
+        except Exception:
+            return f'<div class="highlight"><pre>{html.escape(text)}</pre></div>'
 
 
 @functools.lru_cache(maxsize=256)
@@ -321,12 +298,14 @@ def _render_mermaid(text: str) -> str:
 
 
 def render_codefence(text: str, info: str | None = None, **kwargs) -> str:
-    lang = (info.split(None, 1)[0] if info else "") or ""
+    parts = (info or "").split(None, 1)
+    lang = parts[0] if parts else ""
+    filename = parts[1] if len(parts) > 1 else None
     if lang == "mermaid":
         return _render_mermaid(text)
 
     highlighted = _highlight_code_cached(text, lang, theme.config.pygments_style)
-    badge = _lang_badge(lang) if lang else ""
+    badge = _lang_badge(lang, filename) if lang else ""
 
     return f'<div class="el-code-wrap">{badge}{_COPY_BTN}{highlighted}</div>'
 
@@ -368,4 +347,25 @@ def _heading_slugify(text: str) -> str:
     return re.sub(r'[-\s]+', '-', text)
 
 
-md = mistune.create_markdown(escape=False, plugins=[_codefence_plugin, _table_plugin.table, _math_plugin])
+# Relax CommonMark's 0-3 space indentation limit on fenced code blocks,
+# so indented closing fences (common in Python triple-quoted strings) are
+# still recognized as fence terminators instead of literal content.
+class _RelaxedBlockParser(mistune.block_parser.BlockParser):
+    SPECIFICATION = {
+        **mistune.block_parser.BlockParser.SPECIFICATION,
+        'fenced_code': r'^(?P<fenced_1> *)(?P<fenced_2>`{3,}|~{3,})[ \t]*(?P<fenced_3>.*?)$',
+    }
+
+    def parse_fenced_code(self, m, state):
+        cursor = m.end() + 1
+        state.src = state.src[:cursor] + re.sub(
+            r'^ +(`{3,}|~{3,})\s*$', r'\1', state.src[cursor:], flags=re.MULTILINE)
+        return super().parse_fenced_code(m, state)
+
+
+md = mistune.Markdown(
+    renderer=mistune.HTMLRenderer(escape=False),
+    inline=mistune.InlineParser(),
+    block=_RelaxedBlockParser(),
+    plugins=[_codefence_plugin, _table_plugin.table, _math_plugin],
+)
