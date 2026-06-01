@@ -15,31 +15,31 @@ def _slugify(text: str) -> str:
     return re.sub(r'[-\s]+', '-', text).strip('-')
 
 
-def _extract_headings(html_str: str) -> list[tuple[int, str, str]]:
+def _extract_headings(html_str: str) -> list[tuple[int, str, str, str]]:
     headings = []
     for m in _HEADING_RE.finditer(html_str):
         level = int(m.group(1))
-        raw_text = m.group(3)
-        text = re.sub(r'<[^>]+>', '', raw_text)
+        inner = m.group(3)
+        text = re.sub(r'<[^>]+>', '', inner)
         text = html_mod.unescape(text).strip()
         attrs = m.group(2)
         id_m = _ID_RE.search(attrs)
         slug = id_m.group(1) if id_m else _slugify(text)
-        headings.append((level, text, slug))
+        headings.append((level, inner.strip(), text, slug))
     return headings
 
 
-def _render_toc_tree(headings: list[tuple[int, str, str]]) -> str:
+def _render_toc_tree(headings: list[tuple[int, str, str, str]]) -> str:
     if not headings:
         return "<ul>\n</ul>"
 
     def _render(idx, parent_level):
         items: list[str] = []
         while idx < len(headings):
-            level, text, slug = headings[idx]
+            level, inner, text, slug = headings[idx]
             if level <= parent_level:
                 break
-            item = f'  <li><a href="#{slug}">{html_mod.escape(text)}</a>'
+            item = f'  <li><a href="#{slug}">{inner}</a>'
             idx += 1
             if idx < len(headings) and headings[idx][0] > level:
                 sub, idx = _render(idx, level)
