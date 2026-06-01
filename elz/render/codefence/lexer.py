@@ -55,6 +55,15 @@ class ElfPythonLexer(Python3Lexer):
             return r, ni
         return [tokens[i]], i + 1
 
+    def _detect_sublang(self, inner_text: str) -> tuple[str | None, str]:
+        first = inner_text.lstrip()
+        first_word = first.split(None, 1)[0] if first else ""
+        if first_word in SUBLANG_PREFIXES:
+            return first_word, first_word
+        if first_word == "--sql":
+            return "sql", first_word
+        return None, first_word
+
     def _try_triple_with_prefix(self, tokens, i):
         n = len(tokens)
         if i >= n:
@@ -77,18 +86,6 @@ class ElfPythonLexer(Python3Lexer):
         if idx >= n:
             return None, i
 
-        lang_value = tokens[idx][2].strip()
-        if lang_value not in SUBLANG_PREFIXES:
-            return None, i
-        lang = lang_value
-        lang_token = tokens[idx]
-        idx += 1
-        if idx >= n:
-            return None, i
-
-        if self._is_interpol_type(tokens[idx][1]):
-            return None, i
-
         content_tokens = []
         close_token = None
         while idx < n:
@@ -97,8 +94,6 @@ class ElfPythonLexer(Python3Lexer):
                 close_token = t
                 idx += 1
                 break
-            if self._is_interpol_type(t[1]):
-                return None, i
             content_tokens.append(t)
             idx += 1
 
@@ -107,21 +102,31 @@ class ElfPythonLexer(Python3Lexer):
 
         inner_text = "".join(t[2] for t in content_tokens)
 
+        lang, first_word = self._detect_sublang(inner_text)
+
+        if lang is None:
+            return None, i
+
         sub_lexer = self._get_lexer(lang)
 
         result = []
         if affix:
             result.append((tokens[i][0], String.Affix, affix))
         result.append((delim_token[0], String, open_delim))
-        result.append((lang_token[0], Comment, lang))
+        result.append((content_tokens[0][0], Comment, first_word))
 
-        if sub_lexer and inner_text:
-            content_base = content_tokens[0][0] if content_tokens else 0
-            for sub_pos, sub_ttype, sub_value in sub_lexer.get_tokens_unprocessed(inner_text):
-                result.append((content_base + sub_pos, sub_ttype, sub_value))
-        elif inner_text and content_tokens:
-            result.append((content_tokens[0][0], String, inner_text))
-
+        for seg_type, seg_tokens in self._split_segments(content_tokens[1:]):
+            if seg_type == 'text':
+                seg_text = "".join(t[2] for t in seg_tokens)
+                if sub_lexer and seg_text:
+                    base = seg_tokens[0][0]
+                    for sp, st, sv in sub_lexer.get_tokens_unprocessed(seg_text):
+                        result.append((base + sp, st, sv))
+                elif seg_text:
+                    result.append((seg_tokens[0][0], String, seg_text))
+            else:
+                for t in seg_tokens:
+                    result.append(t)
         result.append((close_token[0], String, close_token[2]))
         return result, idx
 
@@ -209,10 +214,9 @@ class ElfPythonLexer(Python3Lexer):
         skip_sublang_inner = False
         if open_delim in TRIPLE_DELIMS:
             inner_text = "".join(t[2] for t in content_tokens)
-            first = inner_text.lstrip()
-            first_word = first.split(None, 1)[0] if first else ""
-            if first_word in SUBLANG_PREFIXES:
-                lang = first_word
+            detected, first_word = self._detect_sublang(inner_text)
+            if detected:
+                lang = detected
                 skip_sublang_inner = True
 
         sub_lexer = self._get_lexer(lang)
