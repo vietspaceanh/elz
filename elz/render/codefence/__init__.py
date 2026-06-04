@@ -361,7 +361,7 @@ def _math_plugin(md):
     def _render_display_inline_math(_, text):
         return r'<span class="math">\[' + text + r"\]</span>"
 
-    display_inline_math_pattern = r"\$\$(?!\s)(?P<display_math_text>.+?)(?!\s)\$\$"
+    display_inline_math_pattern = r"\$\$\s*(?P<display_math_text>.+?)\s*\$\$"
 
     _upstream_math_plugin(md)
     md.inline.register(
