@@ -116,6 +116,8 @@ def _drawer_css(position: str) -> str:
     .el-drawer-h h3 {{ margin: 0; font-size: 1.1em; font-weight: 600; }}
     .el-root ul {{ list-style: none; padding: 0; margin: 0; }}
     .el-root li {{ position: relative; padding: 2px 0; }}
+    .el-root li + li {{ margin-top: 0; }}
+    .el-root li > ul, .el-root li > ol {{ margin-top: 0; }}
     .el-root ul ul > li {{ padding-left: 1.4em; }}
     .el-root ul ul > li::before {{ content: ''; position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid var(--el-border); }}
     .el-root ul ul > li:last-child::before {{ height: .75em; bottom: auto; }}
