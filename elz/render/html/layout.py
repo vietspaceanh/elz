@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import html
-from ...specs import ElementSpec, Mods
+from ...specs import Deco, ElementSpec
 
 
 def row_spec(
@@ -9,7 +9,6 @@ def row_spec(
     cols: int = 2,
     weights: list[int | float] | None = None,
     gap: int | str | None = None,
-    mods: list[Mods | None] | None = None,
 ) -> ElementSpec:
     _weights = weights or [c.weight for c in children]
     if _weights and any(w is not None for w in _weights):
@@ -23,7 +22,7 @@ def row_spec(
     else:
         gap_str = gap
     items = "\n".join(
-        _grid_item_html(f"__ELF_{i}__", mods=mods[i] if mods else None)
+        _grid_item_html(f"__ELF_{i}__", decos=children[i].decos)
         for i in range(len(children))
     )
     content = (
@@ -41,15 +40,16 @@ def row_spec(
     return _layout_spec("grid", content, deps=children, args=args)
 
 
-def _grid_item_html(ph: str, extra_style: str = "", mods: Mods | None = None) -> str:
+def _grid_item_html(ph: str, extra_style: str = "", decos: list[Deco] | None = None) -> str:
     el_classes = ['el-grid-item']
     styles = ["min-width:0"]
     extra = ""
-    if mods:
-        el_classes = mods.apply_classes(el_classes)
-        styles.extend(mods.styles)
-        for k, v in mods.attrs.items():
-            extra += f' {k}' if v == '' else f' {k}="{html.escape(str(v))}"'
+    if decos:
+        for d in decos:
+            el_classes = d.apply_classes(el_classes)
+            styles.extend(d.styles)
+            for k, v in d.attrs.items():
+                extra += f' {k}' if v == '' else f' {k}="{html.escape(str(v))}"'
     if extra_style:
         styles.append(extra_style)
     return f'    <div class="{" ".join(el_classes)}" style="{";".join(styles)}"{extra}>{ph}</div>'

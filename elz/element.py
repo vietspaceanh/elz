@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import itertools
 import re
 from dataclasses import replace
 
@@ -9,7 +10,11 @@ from .render.html.layout import column_spec, row_spec
 from .render.html.style import STRUCTURAL_CSS
 from .render.theme import theme
 from .runtime import composition_deps, runtime
-from .specs import ElementSpec, Mods
+from .specs import Deco, ElementSpec, Wrapper
+from .mods import to_modifier
+
+
+_apply_seq = itertools.count()
 
 
 class Element:
@@ -110,29 +115,27 @@ class Element:
             return column(other, self)
         return NotImplemented
 
-    def _copy(self) -> Element:
-        return Element(replace(self.spec))
+    def _clone(self, **kw) -> Element:
+        return Element(replace(self.spec, **kw))
 
     def _apply_modifier(self, modifier):
-        if isinstance(modifier, (int, float)):
-            el = self._copy()
-            el.spec.weight = modifier
-            return el
-        if isinstance(modifier, Mods):
-            el = self._copy()
-            el.spec.mods = (el.spec.mods or Mods()).merge(modifier)
-            return el
-        if isinstance(modifier, str):
-            el = self._copy()
-            mods = el.spec.mods or Mods()
-            el.spec.mods = mods.merge(Mods.parse(modifier))
-            return el
-        if callable(modifier):
-            el = self._copy()
-            result = modifier()
-            if isinstance(result, Mods):
-                el.spec.mods = (el.spec.mods or Mods()).merge(result)
-                return el
+        mod = to_modifier(modifier)
+        if mod is None:
+            return NotImplemented
+        if isinstance(mod, (int, float)):
+            return self._clone(weight=mod)
+        if isinstance(mod, Wrapper):
+            seq = next(_apply_seq)
+            return Element(ElementSpec(
+                func_name=mod.func_name or self.func_name,
+                name=f"{self.name}__wrap_{seq}",
+                format="html",
+                content=mod.content,
+                deps=[self.spec],
+                css=mod.css,
+            ))
+        if isinstance(mod, Deco):
+            return self._clone(decos=[*self.spec.decos, mod])
         return NotImplemented
 
     def __bool__(self):
@@ -192,8 +195,7 @@ def root(body: Element) -> Element:
 
 def row(*children: Element, weights: list[int | float] | None = None, gap: int | str | None = None) -> Element:
     specs = [c.spec for c in children]
-    mods = [c.spec.mods for c in children]
-    spec = row_spec(specs, cols=len(children), weights=weights, gap=gap, mods=mods)
+    spec = row_spec(specs, cols=len(children), weights=weights, gap=gap)
     el = Element(spec)
     el._layout_children = list(children)
     return el
@@ -203,10 +205,6 @@ def column(*children: Element, gap: int | str | None = None) -> Element:
     specs = [c.spec for c in children]
     spec = column_spec(specs, gap=gap)
     return Element(spec)
-
-
-def sticky(el):
-    return el @ 'data-sticky'
 
 
 def _wrap_repr_html(obj) -> Element | None:

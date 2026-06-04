@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import html
 import re
-from ..specs import ElementSpec
+from ..specs import ElementSpec, replay_decos
 
 _SCOPE_RE = re.compile(r"[^a-zA-Z0-9_-]")
 
@@ -83,8 +84,18 @@ def scope_class(func_name: str) -> str:
 
 
 def wrap_scope(content: str, spec: ElementSpec) -> str:
-    if spec.mods:
-        content = spec.mods.wrap_content(content)
+    if spec.decos:
+        classes, styles, attrs = replay_decos(spec.decos)
+        all_classes = ['el-deco', *classes]
+        style = ';'.join(styles)
+        attrs_str = ''
+        for k, v in attrs.items():
+            if v == '':
+                attrs_str += f' {k}'
+            else:
+                attrs_str += f' {k}="{html.escape(str(v))}"'
+        style_attr = f' style="{html.escape(style)}"' if style else ''
+        content = f'<div class="{" ".join(all_classes)}"{style_attr}{attrs_str}>\n{content}\n</div>'
     if spec.css:
         return f'<div class="{scope_class(spec.func_name)}">{content}</div>'
     return content
