@@ -15,7 +15,7 @@ from mistune.plugins.math import math as _upstream_math_plugin
 from .lexer import ElfPythonLexer
 from ..theme import theme
 
-PYG_RE = re.compile(r"py`([^`]+)`")
+PYG_RE = re.compile(r"(?<![.\w])py`([^`]+)`")
 PYG_PH_RE = re.compile(r"<!--PYG_(\d+)-->")
 _COPY_BTN = """<button class="el-code-copy" title="Copy code" onclick="(function(b){
 var w=b.closest('.el-code-wrap');
