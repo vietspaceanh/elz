@@ -6,7 +6,7 @@ import re
 
 from ...specs import ElementSpec
 from ..css import collect_component_css, wrap_scope
-from ..codefence import md, process_pyg, restore_pyg, _heading_slugify
+from ..codefence import md, process_pyg, restore_pyg
 from ..theme import theme
 
 _SLOT_RE = re.compile(r"__ELF_(\d+)__")
@@ -15,6 +15,10 @@ _SLOT_RE = re.compile(r"__ELF_(\d+)__")
 def _render_markdown(text: str) -> str:
     slug_counts: dict[str, int] = {}
     original = md.renderer.heading
+    
+    def _heading_slugify(text: str) -> str:
+        text = re.sub(r'[^\w\s-]', '', text).strip().lower()
+        return re.sub(r'[-\s]+', '-', text)
 
     def _heading(text, level, **attrs):
         slug = _heading_slugify(text)
