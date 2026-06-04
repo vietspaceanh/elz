@@ -51,7 +51,7 @@ def resolve_inline_source(frame):
         if found:
             source = found
 
-    return name, source, source_text
+    return name, source
 
 
 @functools.lru_cache(maxsize=32)

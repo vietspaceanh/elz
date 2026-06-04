@@ -35,9 +35,7 @@ def el(func: typing.Callable[P, str] | str) -> typing.Callable[P, Element] | Ele
     if isinstance(func, str):
         fmt, content = _parse(func)
         frame = inspect.currentframe().f_back
-        name, source, source_text = resolve_inline_source(frame)
-        if not source_text:
-            source_text = content
+        name, source = resolve_inline_source(frame)
         deps = []
         if (stack := composition_deps.get()) and (parent := stack[-1]):
             content, deps = _reindex_slots(content, parent)
@@ -49,7 +47,6 @@ def el(func: typing.Callable[P, str] | str) -> typing.Callable[P, Element] | Ele
             deps=deps,
             adhoc_fn=lambda: content,
             source=source,
-            source_text=source_text,
         )
         return Element(spec)
 
@@ -81,9 +78,7 @@ def el(func: typing.Callable[P, str] | str) -> typing.Callable[P, Element] | Ele
 
         if not source:
             frame = inspect.currentframe().f_back
-            _, source, source_text = resolve_inline_source(frame)
-        else:
-            source_text = None
+            _, source = resolve_inline_source(frame)
 
         unique_name = f"{label}@{source[0]}:{source[1]}" if source else label
         spec = ElementSpec(
@@ -91,7 +86,6 @@ def el(func: typing.Callable[P, str] | str) -> typing.Callable[P, Element] | Ele
             name=unique_name,
             format="html",
             source=source,
-            source_text=source_text,
             adhoc_fn=func._repr_html_,
         )
         return Element(spec)
@@ -178,7 +172,6 @@ class ElementFunction:
             format=fmt,
             content=content,
             source=self.source,
-            source_text=self.source_text,
             css=self._css,
             css_variants=self._css_variants,
             adhoc_fn=adhoc_fn,
@@ -267,14 +260,14 @@ class ElementFunction:
         if self.args is None:
             return
         if self._error is not None:
-            return
+            self._error = None
         return self()._repr_html_()
 
     def __rich_console__(self, console, options):
         if self.args is None:
             return
         if self._error is not None:
-            return
+            self._error = None
         element = self()
         yield from element.__rich_console__(console, options)
 
