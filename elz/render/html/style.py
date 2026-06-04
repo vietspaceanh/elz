@@ -3,9 +3,9 @@ from __future__ import annotations
 # Spacing multipliers (scale against variables like --el-gap)
 _GAP_STANDARD = 1
 _H1_TOP_EM = 1.5
-_H2_TOP_EM = 1.2
-_H3_TOP_EM = 1
-_H4_TOP_EM = 0.66
+_H2_TOP_EM = 1.3
+_H3_TOP_EM = 1.3
+_H4_TOP_EM = 1.3
 _H1_SIZE = 1.75
 _H2_SIZE = 1.45
 _H3_SIZE = 1.3
@@ -15,11 +15,14 @@ _HEADING_LINE_HEIGHT = 1.2
 _GRID_PADDING_X = 2.5
 _CELL_PADDING = 0.6
 _LIST_INDENT = 2
+_LI_GAP = 0.33
+_LI_NESTED_GAP = 0.5
+_P_LIST_GAP = 0.5
 
 # All structural wrapper classes are transparent (no margin on themselves)
-_TRANSPARENT_WRAPPERS = ".el-row, .el-grid-item, .el-dev, .el-fold-section, .el-text, .el-mods"
+_TRANSPARENT_WRAPPERS = ".el-row, .el-grid-item, .el-dev, .el-fold-section, .el-text, .el-deco"
 # All containers that can hold markdown-rendered content
-_CONTENT_SCOPES = ".el, .el-dev, .el-row, .el-fold-section, .el-grid-item, .el-text, .el-mods"
+_CONTENT_SCOPES = ".el, .el-dev, .el-row, .el-fold-section, .el-grid-item, .el-text, .el-deco"
 
 _PAGE_CSS = f"""
 /* Root container */
@@ -35,8 +38,10 @@ _PAGE_CSS = f"""
     line-height: calc(1em + var(--el-gap)*{_LINE_HEIGHT_FACTOR});
 }}
 
-/* List spacing between items with direct <p> (paragraph split) */
-:is({_CONTENT_SCOPES}) li:has(> p) + li:has(> p) {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD}); }}
+/* Consistent list spacing between all items */
+:is({_CONTENT_SCOPES}) li + li {{ margin-top: calc(var(--el-gap) * {_LI_GAP}); }}
+/* Nested list spacing */
+:is({_CONTENT_SCOPES}) li > ul, :is({_CONTENT_SCOPES}) li > ol {{ margin-top: calc(var(--el-gap) * {_LI_NESTED_GAP}); }}
 
 /* Grid item layout */
 .el-grid-item {{
@@ -80,7 +85,7 @@ _MARKDOWN_CSS = f"""
 :is({_CONTENT_SCOPES}) li {{ margin-bottom: 0; }}
 :is({_CONTENT_SCOPES}) ol > li::marker {{ font-weight: 600; }}
 :is({_CONTENT_SCOPES}) li > p {{ margin-top: 0; margin-bottom: 0; }}
-:is({_CONTENT_SCOPES}) li > span.math {{ display: inline-block; margin: 0; padding-top: calc(var(--el-gap) * {_GAP_STANDARD / 4}); padding-bottom: calc(var(--el-gap) * {_GAP_STANDARD / 4}); }}
+:is({_CONTENT_SCOPES}) li > span.math {{ display: inline-block; margin: 0; }}
 :is({_CONTENT_SCOPES}) pre {{ margin-bottom: 0; }}
 :is({_CONTENT_SCOPES}) blockquote {{ margin-bottom: 0; padding: 0 1em; opacity: var(--el-opacity); }}
 :where({_CONTENT_SCOPES}) table {{ margin-bottom: 0; border-collapse: separate; border-spacing: 0; width: 100%; border: 1px solid var(--el-border); border-radius: var(--el-border-radius); overflow: hidden; }}
@@ -126,7 +131,7 @@ _RHYTHM_CSS = f"""
 :is({_CONTENT_SCOPES}) h4 {{ margin-top: {_H4_TOP_EM}em; }}
 
 /* Tighter spacing between paragraph and following list */
-:is({_CONTENT_SCOPES}) > p + ul, :is({_CONTENT_SCOPES}) > p + ol {{ margin-top: calc(var(--el-gap) * {_GAP_STANDARD} / 4); }}
+:is({_CONTENT_SCOPES}) > p + ul, :is({_CONTENT_SCOPES}) > p + ol {{ margin-top: calc(var(--el-gap) * {_P_LIST_GAP}); }}
 
 /* Flex/grid containers follow the standard gap */
 .el > div[style*="display:flex"],
